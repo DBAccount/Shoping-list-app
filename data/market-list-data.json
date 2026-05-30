@@ -48,9 +48,15 @@
       "item": "Whole Milk",
       "qty": 1,
       "unit": "unit"
+    },
+    "dairy::Paneer": {
+      "catId": "dairy",
+      "item": "Paneer",
+      "qty": 1,
+      "unit": "unit"
     }
   },
   "customItems": [],
   "sessions": [],
-  "lastSaved": "2026-05-30T14:28:38.990Z"
+  "lastSaved": "2026-05-30T14:28:43.274Z"
 }

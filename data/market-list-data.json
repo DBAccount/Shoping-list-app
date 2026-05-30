@@ -36,9 +36,15 @@
       "item": "Ginger",
       "qty": 1,
       "unit": "unit"
+    },
+    "fruits::Courgette": {
+      "catId": "fruits",
+      "item": "Courgette",
+      "qty": 1,
+      "unit": "unit"
     }
   },
   "customItems": [],
   "sessions": [],
-  "lastSaved": "2026-05-30T14:28:31.563Z"
+  "lastSaved": "2026-05-30T14:28:33.132Z"
 }

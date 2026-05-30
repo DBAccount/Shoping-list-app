@@ -6,11 +6,23 @@ A scratchpad for features and improvements. Add ideas freely; move to **Done** w
 
 ## Ideas
 
-### List view — price column + running total
-Currently the list view (📋 tab) shows each item with qty and unit but no price.
-Add an optional price field per item directly in the list so the user can see a
-running estimated total while shopping — without having to go to the Receipt tab
-afterwards. The total could sit in the sticky bottom bar next to the progress counter.
+### Browse screen — sort items by past order frequency
+In the Browse (🏪) tab, items within each category should be sorted by how many
+times they have appeared in past shopping sessions. The `sessions` array already
+stored in GitHub (`data/market-list-data.json`) contains every receipt, so the
+frequency can be derived at load time without any extra storage.
+
+Most-ordered items float to the top of each category grid; items never ordered
+before stay at the bottom. Makes the browse screen feel personalised over time.
+
+### List view — price per item + line total column
+Add two new columns to each row in the list view (📋 tab):
+- **Unit price** — editable price field the user fills in while shopping
+- **Line total** — auto-calculated as `unit price × qty`, shown read-only next to it
+
+A grand total of all line totals should appear in the sticky bottom bar alongside
+the progress counter, giving a live spend estimate before reaching the checkout.
+Data stays local to the cart (not saved to GitHub until a receipt is logged).
 
 ### Smart default units per item
 Every item currently defaults to "unit" in the unit dropdown.

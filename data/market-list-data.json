@@ -12,9 +12,15 @@
       "item": "Lemon",
       "qty": 1,
       "unit": "unit"
+    },
+    "fruits::Onions": {
+      "catId": "fruits",
+      "item": "Onions",
+      "qty": 1,
+      "unit": "unit"
     }
   },
   "customItems": [],
   "sessions": [],
-  "lastSaved": "2026-05-30T14:28:21.527Z"
+  "lastSaved": "2026-05-30T14:28:23.312Z"
 }

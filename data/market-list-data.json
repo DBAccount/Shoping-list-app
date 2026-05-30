@@ -60,9 +60,15 @@
       "item": "Green Tea",
       "qty": 1,
       "unit": "unit"
+    },
+    "frozen::Edamame": {
+      "catId": "frozen",
+      "item": "Edamame",
+      "qty": 1,
+      "unit": "unit"
     }
   },
   "customItems": [],
   "sessions": [],
-  "lastSaved": "2026-05-30T14:29:51.531Z"
+  "lastSaved": "2026-05-30T14:30:15.281Z"
 }

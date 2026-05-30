@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "cart": {
+    "fruits::Apples": {
+      "catId": "fruits",
+      "item": "Apples",
+      "qty": 1,
+      "unit": "unit"
+    }
+  },
+  "customItems": [],
+  "sessions": [],
+  "lastSaved": "2026-05-30T14:28:05.958Z"
+}

@@ -6,7 +6,6 @@
   <title>🛒 Market List</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://unpkg.com/recharts@2.12.0/umd/Recharts.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -14,648 +13,1926 @@
     input,select,textarea,button{font-family:inherit}
     ::-webkit-scrollbar{width:4px}
     ::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
-    .spin{animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel">
+<script>
+// React and Recharts loaded as globals from CDN above
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
-const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } = Recharts;
+const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } = Recharts;
+</script>
+<script>
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+var _React = React,
+  useState = _React.useState,
+  useEffect = _React.useEffect,
+  useRef = _React.useRef,
+  useMemo = _React.useMemo,
+  useCallback = _React.useCallback;
+var _Recharts = Recharts,
+  BarChart = _Recharts.BarChart,
+  Bar = _Recharts.Bar,
+  XAxis = _Recharts.XAxis,
+  YAxis = _Recharts.YAxis,
+  Tooltip = _Recharts.Tooltip,
+  ResponsiveContainer = _Recharts.ResponsiveContainer,
+  PieChart = _Recharts.PieChart,
+  Pie = _Recharts.Pie,
+  Cell = _Recharts.Cell,
+  Legend = _Recharts.Legend;
 
 // ─── REPO CONFIG (pre-filled — user only needs to add token) ─────────────────
-const REPO_OWNER  = "DBAccount";
-const REPO_NAME   = "Shoping-list-app";
-const DATA_PATH   = "data/market-list-data.json";
-const CFG_LOCAL   = "ml_github_token";   // localStorage key for token
+var REPO_OWNER = "DBAccount";
+var REPO_NAME = "Shoping-list-app";
+var DATA_PATH = "data/market-list-data.json";
+var CFG_LOCAL = "ml_github_token"; // localStorage key for token
 
 // ─── CATEGORIES ──────────────────────────────────────────────────────────────
-const CATEGORIES = [
-  { id:"fruits",    label:"Fruits & Veg",   emoji:"🥦", color:"#4a7c59",
-    items:["Apples","Bananas","Oranges","Mango","Grapes","Strawberries","Blueberries","Pineapple","Watermelon","Lemon","Avocado","Spinach","Kale","Broccoli","Carrots","Tomatoes","Cucumber","Bell Peppers","Onions","Garlic","Ginger","Potatoes","Sweet Potato","Courgette","Aubergine","Mushrooms","Lettuce","Celery","Beetroot","Lime","Pear","Peach"] },
-  { id:"dairy",     label:"Dairy & Eggs",   emoji:"🥛", color:"#6aafc2",
-    items:["Whole Milk","Semi-Skimmed Milk","Almond Milk","Oat Milk","Butter","Ghee","Cheddar Cheese","Mozzarella","Paneer","Greek Yogurt","Natural Yogurt","Cream","Sour Cream","Eggs (6)","Eggs (12)","Cream Cheese","Cottage Cheese","Halloumi"] },
-  { id:"bakery",    label:"Bread & Bakery", emoji:"🍞", color:"#c4883a",
-    items:["White Bread","Wholemeal Bread","Sourdough","Baguette","Pitta Bread","Naan Bread","Chapati","Bagels","Croissants","English Muffins","Tortilla Wraps","Rice Cakes","Crackers","Seeded Loaf"] },
-  { id:"pantry",    label:"Pantry",         emoji:"🫙", color:"#9b7bb5",
-    items:["Basmati Rice","Brown Rice","Pasta","Spaghetti","Noodles","Red Lentils","Green Lentils","Chickpeas","Black Beans","Kidney Beans","Rolled Oats","Quinoa","Flour","Sugar","Brown Sugar","Honey","Olive Oil","Coconut Oil","Sunflower Oil","Soy Sauce","Tomato Paste","Canned Tomatoes","Coconut Milk","Vegetable Stock","Baking Powder","Salt","Black Pepper","Turmeric","Cumin","Coriander","Chilli Powder","Garam Masala","Mustard Seeds","Cardamom","Cinnamon","Paprika"] },
-  { id:"beverages", label:"Beverages",      emoji:"☕", color:"#a0634a",
-    items:["Green Tea","Black Tea","Chai","Ground Coffee","Instant Coffee","Orange Juice","Apple Juice","Coconut Water","Sparkling Water","Still Water","Lemonade","Kombucha","Protein Shake Mix"] },
-  { id:"snacks",    label:"Snacks",         emoji:"🍫", color:"#c95f7e",
-    items:["Mixed Nuts","Almonds","Cashews","Walnuts","Peanuts","Dark Chocolate","Peanut Butter","Almond Butter","Hummus","Popcorn","Crisps","Trail Mix","Protein Bar","Dried Fruits","Dates","Granola Bar","Rice Crackers"] },
-  { id:"frozen",    label:"Frozen",         emoji:"🧊", color:"#5b9ec9",
-    items:["Frozen Peas","Frozen Spinach","Frozen Corn","Edamame","Frozen Berries","Frozen Mango","Veggie Burgers","Frozen Pizza","Ice Cream","Frozen Chips"] },
-  { id:"household", label:"Household",      emoji:"🧹", color:"#6b9e8a",
-    items:["Washing Liquid","Dishwasher Tablets","Kitchen Roll","Toilet Roll","Bin Bags","Cling Film","Foil","Zip Lock Bags","Washing Up Liquid","Multi-surface Spray","Bleach","Laundry Detergent","Fabric Softener","Sponges"] },
-  { id:"personal",  label:"Personal Care",  emoji:"🧴", color:"#d4856b",
-    items:["Shampoo","Conditioner","Body Wash","Face Wash","Moisturiser","Sunscreen","Toothpaste","Toothbrush","Floss","Deodorant","Razor","Shaving Cream","Hand Soap","Cotton Buds"] },
-];
-const ALL_CATS = [...CATEGORIES, { id:"custom", label:"Custom Items", emoji:"✏️", color:"#888" }];
-const UNITS    = ["unit","kg","g","litre","ml","pack","bunch","dozen","bag","box","tin"];
+var CATEGORIES = [{
+  id: "fruits",
+  label: "Fruits & Veg",
+  emoji: "🥦",
+  color: "#4a7c59",
+  items: ["Apples", "Bananas", "Oranges", "Mango", "Grapes", "Strawberries", "Blueberries", "Pineapple", "Watermelon", "Lemon", "Avocado", "Spinach", "Kale", "Broccoli", "Carrots", "Tomatoes", "Cucumber", "Bell Peppers", "Onions", "Garlic", "Ginger", "Potatoes", "Sweet Potato", "Courgette", "Aubergine", "Mushrooms", "Lettuce", "Celery", "Beetroot", "Lime", "Pear", "Peach"]
+}, {
+  id: "dairy",
+  label: "Dairy & Eggs",
+  emoji: "🥛",
+  color: "#6aafc2",
+  items: ["Whole Milk", "Semi-Skimmed Milk", "Almond Milk", "Oat Milk", "Butter", "Ghee", "Cheddar Cheese", "Mozzarella", "Paneer", "Greek Yogurt", "Natural Yogurt", "Cream", "Sour Cream", "Eggs (6)", "Eggs (12)", "Cream Cheese", "Cottage Cheese", "Halloumi"]
+}, {
+  id: "bakery",
+  label: "Bread & Bakery",
+  emoji: "🍞",
+  color: "#c4883a",
+  items: ["White Bread", "Wholemeal Bread", "Sourdough", "Baguette", "Pitta Bread", "Naan Bread", "Chapati", "Bagels", "Croissants", "English Muffins", "Tortilla Wraps", "Rice Cakes", "Crackers", "Seeded Loaf"]
+}, {
+  id: "pantry",
+  label: "Pantry",
+  emoji: "🫙",
+  color: "#9b7bb5",
+  items: ["Basmati Rice", "Brown Rice", "Pasta", "Spaghetti", "Noodles", "Red Lentils", "Green Lentils", "Chickpeas", "Black Beans", "Kidney Beans", "Rolled Oats", "Quinoa", "Flour", "Sugar", "Brown Sugar", "Honey", "Olive Oil", "Coconut Oil", "Sunflower Oil", "Soy Sauce", "Tomato Paste", "Canned Tomatoes", "Coconut Milk", "Vegetable Stock", "Baking Powder", "Salt", "Black Pepper", "Turmeric", "Cumin", "Coriander", "Chilli Powder", "Garam Masala", "Mustard Seeds", "Cardamom", "Cinnamon", "Paprika"]
+}, {
+  id: "beverages",
+  label: "Beverages",
+  emoji: "☕",
+  color: "#a0634a",
+  items: ["Green Tea", "Black Tea", "Chai", "Ground Coffee", "Instant Coffee", "Orange Juice", "Apple Juice", "Coconut Water", "Sparkling Water", "Still Water", "Lemonade", "Kombucha", "Protein Shake Mix"]
+}, {
+  id: "snacks",
+  label: "Snacks",
+  emoji: "🍫",
+  color: "#c95f7e",
+  items: ["Mixed Nuts", "Almonds", "Cashews", "Walnuts", "Peanuts", "Dark Chocolate", "Peanut Butter", "Almond Butter", "Hummus", "Popcorn", "Crisps", "Trail Mix", "Protein Bar", "Dried Fruits", "Dates", "Granola Bar", "Rice Crackers"]
+}, {
+  id: "frozen",
+  label: "Frozen",
+  emoji: "🧊",
+  color: "#5b9ec9",
+  items: ["Frozen Peas", "Frozen Spinach", "Frozen Corn", "Edamame", "Frozen Berries", "Frozen Mango", "Veggie Burgers", "Frozen Pizza", "Ice Cream", "Frozen Chips"]
+}, {
+  id: "household",
+  label: "Household",
+  emoji: "🧹",
+  color: "#6b9e8a",
+  items: ["Washing Liquid", "Dishwasher Tablets", "Kitchen Roll", "Toilet Roll", "Bin Bags", "Cling Film", "Foil", "Zip Lock Bags", "Washing Up Liquid", "Multi-surface Spray", "Bleach", "Laundry Detergent", "Fabric Softener", "Sponges"]
+}, {
+  id: "personal",
+  label: "Personal Care",
+  emoji: "🧴",
+  color: "#d4856b",
+  items: ["Shampoo", "Conditioner", "Body Wash", "Face Wash", "Moisturiser", "Sunscreen", "Toothpaste", "Toothbrush", "Floss", "Deodorant", "Razor", "Shaving Cream", "Hand Soap", "Cotton Buds"]
+}];
+var ALL_CATS = [].concat(CATEGORIES, [{
+  id: "custom",
+  label: "Custom Items",
+  emoji: "✏️",
+  color: "#888"
+}]);
+var UNITS = ["unit", "kg", "g", "litre", "ml", "pack", "bunch", "dozen", "bag", "box", "tin"];
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
-const fmt    = n  => `£${(+n||0).toFixed(2)}`;
-const catOf  = id => ALL_CATS.find(c=>c.id===id) || {label:"Other",emoji:"🛒",color:"#888"};
-const dateLbl= iso=> new Date(iso).toLocaleDateString("en-GB",{day:"2-digit",month:"short"});
+var fmt = function fmt(n) {
+  return "\xA3".concat((+n || 0).toFixed(2));
+};
+var catOf = function catOf(id) {
+  return ALL_CATS.find(function (c) {
+    return c.id === id;
+  }) || {
+    label: "Other",
+    emoji: "🛒",
+    color: "#888"
+  };
+};
+var dateLbl = function dateLbl(iso) {
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short"
+  });
+};
 
 // ─── GITHUB API ───────────────────────────────────────────────────────────────
-const GH = "https://api.github.com";
-const ghHeaders = token => ({ Authorization:`token ${token}`, Accept:"application/vnd.github.v3+json", "Content-Type":"application/json" });
-const encode = obj => btoa(unescape(encodeURIComponent(JSON.stringify(obj,null,2))));
-const decode = b64 => JSON.parse(decodeURIComponent(escape(atob(b64.replace(/\n/g,"")))));
-
-async function ghRead(token) {
-  const r = await fetch(`${GH}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}`, { headers:ghHeaders(token) });
-  if (r.status===404) return { data:null, sha:null };
-  if (!r.ok) { const e=await r.json(); throw new Error(e.message||`GitHub ${r.status}`); }
-  const j = await r.json();
-  return { data:decode(j.content), sha:j.sha };
-}
-
-async function ghWrite(token, data, sha) {
-  const body = {
-    message:`Market List · ${new Date().toLocaleString("en-GB")}`,
-    content: encode(data),
-    ...(sha ? {sha} : {})
+var GH = "https://api.github.com";
+var ghHeaders = function ghHeaders(token) {
+  return {
+    Authorization: "token ".concat(token),
+    Accept: "application/vnd.github.v3+json",
+    "Content-Type": "application/json"
   };
-  const r = await fetch(`${GH}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}`, {
-    method:"PUT", headers:ghHeaders(token), body:JSON.stringify(body)
-  });
-  if (!r.ok) { const e=await r.json(); throw new Error(e.message||`GitHub ${r.status}`); }
-  return (await r.json()).content.sha;
+};
+var encode = function encode(obj) {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(obj, null, 2))));
+};
+var decode = function decode(b64) {
+  return JSON.parse(decodeURIComponent(escape(atob(b64.replace(/\n/g, "")))));
+};
+function ghRead(_x) {
+  return _ghRead.apply(this, arguments);
 }
-
-async function ghTestToken(token) {
-  const r = await fetch(`${GH}/repos/${REPO_OWNER}/${REPO_NAME}`, { headers:ghHeaders(token) });
-  if (!r.ok) { const e=await r.json(); throw new Error(e.message); }
-  return true;
+function _ghRead() {
+  _ghRead = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(token) {
+    var r, e, j;
+    return _regenerator().w(function (_context4) {
+      while (1) switch (_context4.n) {
+        case 0:
+          _context4.n = 1;
+          return fetch("".concat(GH, "/repos/").concat(REPO_OWNER, "/").concat(REPO_NAME, "/contents/").concat(DATA_PATH), {
+            headers: ghHeaders(token)
+          });
+        case 1:
+          r = _context4.v;
+          if (!(r.status === 404)) {
+            _context4.n = 2;
+            break;
+          }
+          return _context4.a(2, {
+            data: null,
+            sha: null
+          });
+        case 2:
+          if (r.ok) {
+            _context4.n = 4;
+            break;
+          }
+          _context4.n = 3;
+          return r.json();
+        case 3:
+          e = _context4.v;
+          throw new Error(e.message || "GitHub ".concat(r.status));
+        case 4:
+          _context4.n = 5;
+          return r.json();
+        case 5:
+          j = _context4.v;
+          return _context4.a(2, {
+            data: decode(j.content),
+            sha: j.sha
+          });
+      }
+    }, _callee4);
+  }));
+  return _ghRead.apply(this, arguments);
 }
-
-// ─── EMPTY DATA ───────────────────────────────────────────────────────────────
-const EMPTY = { v:1, cart:{}, customItems:[], sessions:[], lastSaved:null };
+function ghWrite(_x2, _x3, _x4) {
+  return _ghWrite.apply(this, arguments);
+}
+function _ghWrite() {
+  _ghWrite = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(token, data, sha) {
+    var body, r, e;
+    return _regenerator().w(function (_context5) {
+      while (1) switch (_context5.n) {
+        case 0:
+          body = _objectSpread({
+            message: "Market List \xB7 ".concat(new Date().toLocaleString("en-GB")),
+            content: encode(data)
+          }, sha ? {
+            sha: sha
+          } : {});
+          _context5.n = 1;
+          return fetch("".concat(GH, "/repos/").concat(REPO_OWNER, "/").concat(REPO_NAME, "/contents/").concat(DATA_PATH), {
+            method: "PUT",
+            headers: ghHeaders(token),
+            body: JSON.stringify(body)
+          });
+        case 1:
+          r = _context5.v;
+          if (r.ok) {
+            _context5.n = 3;
+            break;
+          }
+          _context5.n = 2;
+          return r.json();
+        case 2:
+          e = _context5.v;
+          throw new Error(e.message || "GitHub ".concat(r.status));
+        case 3:
+          _context5.n = 4;
+          return r.json();
+        case 4:
+          return _context5.a(2, _context5.v.content.sha);
+      }
+    }, _callee5);
+  }));
+  return _ghWrite.apply(this, arguments);
+}
+function ghTestToken(_x5) {
+  return _ghTestToken.apply(this, arguments);
+} // ─── EMPTY DATA ───────────────────────────────────────────────────────────────
+function _ghTestToken() {
+  _ghTestToken = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(token) {
+    var r, e;
+    return _regenerator().w(function (_context6) {
+      while (1) switch (_context6.n) {
+        case 0:
+          _context6.n = 1;
+          return fetch("".concat(GH, "/repos/").concat(REPO_OWNER, "/").concat(REPO_NAME), {
+            headers: ghHeaders(token)
+          });
+        case 1:
+          r = _context6.v;
+          if (r.ok) {
+            _context6.n = 3;
+            break;
+          }
+          _context6.n = 2;
+          return r.json();
+        case 2:
+          e = _context6.v;
+          throw new Error(e.message);
+        case 3:
+          return _context6.a(2, true);
+      }
+    }, _callee6);
+  }));
+  return _ghTestToken.apply(this, arguments);
+}
+var EMPTY = {
+  v: 1,
+  cart: {},
+  customItems: [],
+  sessions: [],
+  lastSaved: null
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 function MarketList() {
   // Auth
-  const [token,   setToken]   = useState(() => localStorage.getItem(CFG_LOCAL)||"");
-  const [tokenInput, setTokenInput] = useState("");
-  const [showSetup, setShowSetup] = useState(false);
-  const [testing,  setTesting]  = useState(false);
-  const [testMsg,  setTestMsg]  = useState(null); // {ok,msg}
+  var _useState = useState(function () {
+      return localStorage.getItem(CFG_LOCAL) || "";
+    }),
+    _useState2 = _slicedToArray(_useState, 2),
+    token = _useState2[0],
+    setToken = _useState2[1];
+  var _useState3 = useState(""),
+    _useState4 = _slicedToArray(_useState3, 2),
+    tokenInput = _useState4[0],
+    setTokenInput = _useState4[1];
+  var _useState5 = useState(false),
+    _useState6 = _slicedToArray(_useState5, 2),
+    showSetup = _useState6[0],
+    setShowSetup = _useState6[1];
+  var _useState7 = useState(false),
+    _useState8 = _slicedToArray(_useState7, 2),
+    testing = _useState8[0],
+    setTesting = _useState8[1];
+  var _useState9 = useState(null),
+    _useState0 = _slicedToArray(_useState9, 2),
+    testMsg = _useState0[0],
+    setTestMsg = _useState0[1]; // {ok,msg}
 
   // Data
-  const [cart,        setCart]        = useState({});
-  const [checked,     setChecked]     = useState({});
-  const [customItems, setCustomItems] = useState([]);
-  const [sessions,    setSessions]    = useState([]);
-  const [ghSha,       setGhSha]       = useState(null);
+  var _useState1 = useState({}),
+    _useState10 = _slicedToArray(_useState1, 2),
+    cart = _useState10[0],
+    setCart = _useState10[1];
+  var _useState11 = useState({}),
+    _useState12 = _slicedToArray(_useState11, 2),
+    checked = _useState12[0],
+    setChecked = _useState12[1];
+  var _useState13 = useState([]),
+    _useState14 = _slicedToArray(_useState13, 2),
+    customItems = _useState14[0],
+    setCustomItems = _useState14[1];
+  var _useState15 = useState([]),
+    _useState16 = _slicedToArray(_useState15, 2),
+    sessions = _useState16[0],
+    setSessions = _useState16[1];
+  var _useState17 = useState(null),
+    _useState18 = _slicedToArray(_useState17, 2),
+    ghSha = _useState18[0],
+    setGhSha = _useState18[1];
 
   // UI
-  const [tab,       setTab]       = useState("browse");
-  const [activeCat, setActiveCat] = useState("fruits");
-  const [search,    setSearch]    = useState("");
-  const [customIn,  setCustomIn]  = useState("");
+  var _useState19 = useState("browse"),
+    _useState20 = _slicedToArray(_useState19, 2),
+    tab = _useState20[0],
+    setTab = _useState20[1];
+  var _useState21 = useState("fruits"),
+    _useState22 = _slicedToArray(_useState21, 2),
+    activeCat = _useState22[0],
+    setActiveCat = _useState22[1];
+  var _useState23 = useState(""),
+    _useState24 = _slicedToArray(_useState23, 2),
+    search = _useState24[0],
+    setSearch = _useState24[1];
+  var _useState25 = useState(""),
+    _useState26 = _slicedToArray(_useState25, 2),
+    customIn = _useState26[0],
+    setCustomIn = _useState26[1];
 
   // Sync
-  const [syncStatus, setSyncStatus] = useState("idle"); // idle|loading|saving|saved|error
-  const [syncMsg,    setSyncMsg]    = useState("");
-  const saveTimer  = useRef(null);
-  const dataReady  = useRef(false);
-  const latestData = useRef({ cart:{}, customItems:[], sessions:[] });
+  var _useState27 = useState("idle"),
+    _useState28 = _slicedToArray(_useState27, 2),
+    syncStatus = _useState28[0],
+    setSyncStatus = _useState28[1]; // idle|loading|saving|saved|error
+  var _useState29 = useState(""),
+    _useState30 = _slicedToArray(_useState29, 2),
+    syncMsg = _useState30[0],
+    setSyncMsg = _useState30[1];
+  var saveTimer = useRef(null);
+  var dataReady = useRef(false);
+  var latestData = useRef({
+    cart: {},
+    customItems: [],
+    sessions: []
+  });
 
   // Receipt
-  const [storeName,   setStoreName]   = useState("");
-  const [receiptRows, setReceiptRows] = useState([{name:"",qty:1,price:""}]);
+  var _useState31 = useState(""),
+    _useState32 = _slicedToArray(_useState31, 2),
+    storeName = _useState32[0],
+    setStoreName = _useState32[1];
+  var _useState33 = useState([{
+      name: "",
+      qty: 1,
+      price: ""
+    }]),
+    _useState34 = _slicedToArray(_useState33, 2),
+    receiptRows = _useState34[0],
+    setReceiptRows = _useState34[1];
 
   // ── LOAD ────────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!token) { setShowSetup(true); return; }
+  useEffect(function () {
+    if (!token) {
+      setShowSetup(true);
+      return;
+    }
     loadData(token);
   }, [token]);
-
-  const loadData = async (tok) => {
-    setSyncStatus("loading"); setSyncMsg("Fetching from GitHub…");
-    try {
-      const { data, sha } = await ghRead(tok);
-      const d = data || EMPTY;
-      setCart(d.cart||{}); setCustomItems(d.customItems||[]); setSessions(d.sessions||[]);
-      setGhSha(sha);
-      setSyncStatus("saved"); setSyncMsg(`Loaded ✓  ${d.lastSaved ? "· Last saved "+dateLbl(d.lastSaved) : "· First use"}`);
-      setTimeout(()=>setSyncStatus("idle"),3000);
-    } catch(e) {
-      setSyncStatus("error"); setSyncMsg(`Load failed: ${e.message}`);
-    }
-    dataReady.current = true;
-  };
+  var loadData = /*#__PURE__*/function () {
+    var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(tok) {
+      var _yield$ghRead, data, sha, d, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
+          case 0:
+            setSyncStatus("loading");
+            setSyncMsg("Fetching from GitHub…");
+            _context.p = 1;
+            _context.n = 2;
+            return ghRead(tok);
+          case 2:
+            _yield$ghRead = _context.v;
+            data = _yield$ghRead.data;
+            sha = _yield$ghRead.sha;
+            d = data || EMPTY;
+            setCart(d.cart || {});
+            setCustomItems(d.customItems || []);
+            setSessions(d.sessions || []);
+            setGhSha(sha);
+            setSyncStatus("saved");
+            setSyncMsg("Loaded \u2713  ".concat(d.lastSaved ? "· Last saved " + dateLbl(d.lastSaved) : "· First use"));
+            setTimeout(function () {
+              return setSyncStatus("idle");
+            }, 3000);
+            _context.n = 4;
+            break;
+          case 3:
+            _context.p = 3;
+            _t = _context.v;
+            setSyncStatus("error");
+            setSyncMsg("Load failed: ".concat(_t.message));
+          case 4:
+            dataReady.current = true;
+          case 5:
+            return _context.a(2);
+        }
+      }, _callee, null, [[1, 3]]);
+    }));
+    return function loadData(_x6) {
+      return _ref.apply(this, arguments);
+    };
+  }();
 
   // ── SAVE (debounced, always uses latest ref) ─────────────────────────────
-  const scheduleSave = useCallback((cart, customItems, sessions) => {
+  var scheduleSave = useCallback(function (cart, customItems, sessions) {
     if (!dataReady.current || !token) return;
-    latestData.current = { cart, customItems, sessions };
+    latestData.current = {
+      cart: cart,
+      customItems: customItems,
+      sessions: sessions
+    };
     clearTimeout(saveTimer.current);
-    setSyncStatus("saving"); setSyncMsg("Saving to GitHub…");
-    saveTimer.current = setTimeout(async () => {
-      const { cart:c, customItems:ci, sessions:s } = latestData.current;
-      const payload = { v:1, cart:c, customItems:ci, sessions:s, lastSaved:new Date().toISOString() };
-      try {
-        const newSha = await ghWrite(token, payload, ghSha);
-        setGhSha(newSha);
-        setSyncStatus("saved"); setSyncMsg("Saved to GitHub ✓");
-        setTimeout(()=>setSyncStatus("idle"),2500);
-      } catch(e) {
-        setSyncStatus("error"); setSyncMsg(`Save failed: ${e.message}`);
-      }
-    }, 1000);
+    setSyncStatus("saving");
+    setSyncMsg("Saving to GitHub…");
+    saveTimer.current = setTimeout(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+      var _latestData$current, c, ci, s, payload, newSha, _t2;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
+          case 0:
+            _latestData$current = latestData.current, c = _latestData$current.cart, ci = _latestData$current.customItems, s = _latestData$current.sessions;
+            payload = {
+              v: 1,
+              cart: c,
+              customItems: ci,
+              sessions: s,
+              lastSaved: new Date().toISOString()
+            };
+            _context2.p = 1;
+            _context2.n = 2;
+            return ghWrite(token, payload, ghSha);
+          case 2:
+            newSha = _context2.v;
+            setGhSha(newSha);
+            setSyncStatus("saved");
+            setSyncMsg("Saved to GitHub ✓");
+            setTimeout(function () {
+              return setSyncStatus("idle");
+            }, 2500);
+            _context2.n = 4;
+            break;
+          case 3:
+            _context2.p = 3;
+            _t2 = _context2.v;
+            setSyncStatus("error");
+            setSyncMsg("Save failed: ".concat(_t2.message));
+          case 4:
+            return _context2.a(2);
+        }
+      }, _callee2, null, [[1, 3]]);
+    })), 1000);
   }, [token, ghSha]);
 
   // Updaters that also trigger save
-  const doSetCart = useCallback(fn => {
-    setCart(prev => { const next=fn(prev); scheduleSave(next, customItems, sessions); return next; });
+  var doSetCart = useCallback(function (fn) {
+    setCart(function (prev) {
+      var next = fn(prev);
+      scheduleSave(next, customItems, sessions);
+      return next;
+    });
   }, [customItems, sessions, scheduleSave]);
-
-  const doSetCustom = useCallback(fn => {
-    setCustomItems(prev => { const next=fn(prev); scheduleSave(cart, next, sessions); return next; });
+  var doSetCustom = useCallback(function (fn) {
+    setCustomItems(function (prev) {
+      var next = fn(prev);
+      scheduleSave(cart, next, sessions);
+      return next;
+    });
   }, [cart, sessions, scheduleSave]);
-
-  const doSetSessions = useCallback(fn => {
-    setSessions(prev => { const next=fn(prev); scheduleSave(cart, customItems, next); return next; });
+  var doSetSessions = useCallback(function (fn) {
+    setSessions(function (prev) {
+      var next = fn(prev);
+      scheduleSave(cart, customItems, next);
+      return next;
+    });
   }, [cart, customItems, scheduleSave]);
 
   // ── TOKEN SETUP ─────────────────────────────────────────────────────────
-  const testToken = async () => {
-    setTesting(true); setTestMsg(null);
-    try {
-      await ghTestToken(tokenInput.trim());
-      setTestMsg({ ok:true, msg:`✓ Connected to ${REPO_OWNER}/${REPO_NAME}` });
-    } catch(e) {
-      setTestMsg({ ok:false, msg:`✗ ${e.message}` });
-    }
-    setTesting(false);
-  };
-
-  const saveToken = () => {
-    const t = tokenInput.trim();
+  var testToken = /*#__PURE__*/function () {
+    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+      var _t3;
+      return _regenerator().w(function (_context3) {
+        while (1) switch (_context3.p = _context3.n) {
+          case 0:
+            setTesting(true);
+            setTestMsg(null);
+            _context3.p = 1;
+            _context3.n = 2;
+            return ghTestToken(tokenInput.trim());
+          case 2:
+            setTestMsg({
+              ok: true,
+              msg: "\u2713 Connected to ".concat(REPO_OWNER, "/").concat(REPO_NAME)
+            });
+            _context3.n = 4;
+            break;
+          case 3:
+            _context3.p = 3;
+            _t3 = _context3.v;
+            setTestMsg({
+              ok: false,
+              msg: "\u2717 ".concat(_t3.message)
+            });
+          case 4:
+            setTesting(false);
+          case 5:
+            return _context3.a(2);
+        }
+      }, _callee3, null, [[1, 3]]);
+    }));
+    return function testToken() {
+      return _ref3.apply(this, arguments);
+    };
+  }();
+  var saveToken = function saveToken() {
+    var t = tokenInput.trim();
     localStorage.setItem(CFG_LOCAL, t);
     setToken(t);
     setShowSetup(false);
     setTestMsg(null);
     dataReady.current = false;
   };
-
-  const clearToken = () => {
+  var clearToken = function clearToken() {
     if (!confirm("Disconnect? Your data stays in GitHub, just disconnects this browser.")) return;
     localStorage.removeItem(CFG_LOCAL);
-    setToken(""); setShowSetup(true);
-    setCart({}); setCustomItems([]); setSessions([]);
+    setToken("");
+    setShowSetup(true);
+    setCart({});
+    setCustomItems([]);
+    setSessions([]);
     dataReady.current = false;
   };
 
   // ── CART ────────────────────────────────────────────────────────────────
-  const toggleItem = (catId, name) => {
-    const key = `${catId}::${name}`;
-    doSetCart(prev => {
-      const n={...prev};
-      if (n[key]) delete n[key]; else n[key]={catId,item:name,qty:1,unit:"unit"};
+  var toggleItem = function toggleItem(catId, name) {
+    var key = "".concat(catId, "::").concat(name);
+    doSetCart(function (prev) {
+      var n = _objectSpread({}, prev);
+      if (n[key]) delete n[key];else n[key] = {
+        catId: catId,
+        item: name,
+        qty: 1,
+        unit: "unit"
+      };
       return n;
     });
   };
-  const setCartField = (key,field,val) => doSetCart(prev=>({...prev,[key]:{...prev[key],[field]:val}}));
-  const removeItem   = key => doSetCart(prev=>{ const n={...prev}; delete n[key]; return n; });
-  const clearCart    = () => { doSetCart(()=>({})); setChecked({}); };
+  var setCartField = function setCartField(key, field, val) {
+    return doSetCart(function (prev) {
+      return _objectSpread(_objectSpread({}, prev), {}, _defineProperty({}, key, _objectSpread(_objectSpread({}, prev[key]), {}, _defineProperty({}, field, val))));
+    });
+  };
+  var removeItem = function removeItem(key) {
+    return doSetCart(function (prev) {
+      var n = _objectSpread({}, prev);
+      delete n[key];
+      return n;
+    });
+  };
+  var clearCart = function clearCart() {
+    doSetCart(function () {
+      return {};
+    });
+    setChecked({});
+  };
 
   // ── CUSTOM ITEMS ────────────────────────────────────────────────────────
-  const addCustom = name => {
-    const t=name.trim(); if(!t) return;
-    doSetCustom(prev => prev.find(i=>i.name.toLowerCase()===t.toLowerCase()) ? prev : [...prev,{name:t,catId:"custom"}]);
-    toggleItem("custom",t);
+  var addCustom = function addCustom(name) {
+    var t = name.trim();
+    if (!t) return;
+    doSetCustom(function (prev) {
+      return prev.find(function (i) {
+        return i.name.toLowerCase() === t.toLowerCase();
+      }) ? prev : [].concat(_toConsumableArray(prev), [{
+        name: t,
+        catId: "custom"
+      }]);
+    });
+    toggleItem("custom", t);
     setCustomIn("");
   };
 
   // ── RECEIPT (manual entry) ──────────────────────────────────────────────
-  const addReceiptRow  = () => setReceiptRows(r=>[...r,{name:"",qty:1,price:""}]);
-  const removeReceiptRow = i => setReceiptRows(r=>r.filter((_,j)=>j!==i));
-  const setReceiptCell = (i,field,val) => setReceiptRows(r=>r.map((row,j)=>j===i?{...row,[field]:val}:row));
-
-  const saveReceipt = () => {
-    const validRows = receiptRows.filter(r=>r.name.trim()&&+r.price>0);
+  var addReceiptRow = function addReceiptRow() {
+    return setReceiptRows(function (r) {
+      return [].concat(_toConsumableArray(r), [{
+        name: "",
+        qty: 1,
+        price: ""
+      }]);
+    });
+  };
+  var removeReceiptRow = function removeReceiptRow(i) {
+    return setReceiptRows(function (r) {
+      return r.filter(function (_, j) {
+        return j !== i;
+      });
+    });
+  };
+  var setReceiptCell = function setReceiptCell(i, field, val) {
+    return setReceiptRows(function (r) {
+      return r.map(function (row, j) {
+        return j === i ? _objectSpread(_objectSpread({}, row), {}, _defineProperty({}, field, val)) : row;
+      });
+    });
+  };
+  var saveReceipt = function saveReceipt() {
+    var validRows = receiptRows.filter(function (r) {
+      return r.name.trim() && +r.price > 0;
+    });
     if (!validRows.length) return;
-    const allBuiltIn = CATEGORIES.flatMap(c=>c.items.map(i=>i.toLowerCase()));
-    const items = validRows.map(ri=>{
-      const rn=ri.name.toLowerCase();
-      const match=Object.values(cart).find(c=>c.item.toLowerCase().includes(rn.split(" ")[0])||rn.includes(c.item.toLowerCase().split(" ")[0]));
-      return {name:ri.name,catId:match?.catId||"custom",qty:+ri.qty||1,price:+ri.price};
+    var allBuiltIn = CATEGORIES.flatMap(function (c) {
+      return c.items.map(function (i) {
+        return i.toLowerCase();
+      });
+    });
+    var items = validRows.map(function (ri) {
+      var rn = ri.name.toLowerCase();
+      var match = Object.values(cart).find(function (c) {
+        return c.item.toLowerCase().includes(rn.split(" ")[0]) || rn.includes(c.item.toLowerCase().split(" ")[0]);
+      });
+      return {
+        name: ri.name,
+        catId: (match === null || match === void 0 ? void 0 : match.catId) || "custom",
+        qty: +ri.qty || 1,
+        price: +ri.price
+      };
     });
     // Save new items to custom list
-    const newC = items.filter(si=>!allBuiltIn.includes(si.name.toLowerCase())&&!customItems.find(ci=>ci.name.toLowerCase()===si.name.toLowerCase())).map(si=>({name:si.name,catId:"custom"}));
-    if (newC.length) doSetCustom(prev=>[...prev,...newC]);
-    const total = items.reduce((s,i)=>s+i.price*i.qty,0);
-    doSetSessions(prev=>[...prev,{id:Date.now(),date:new Date().toISOString(),note:storeName.trim()||"Shopping trip",items,total:parseFloat(total.toFixed(2))}]);
+    var newC = items.filter(function (si) {
+      return !allBuiltIn.includes(si.name.toLowerCase()) && !customItems.find(function (ci) {
+        return ci.name.toLowerCase() === si.name.toLowerCase();
+      });
+    }).map(function (si) {
+      return {
+        name: si.name,
+        catId: "custom"
+      };
+    });
+    if (newC.length) doSetCustom(function (prev) {
+      return [].concat(_toConsumableArray(prev), _toConsumableArray(newC));
+    });
+    var total = items.reduce(function (s, i) {
+      return s + i.price * i.qty;
+    }, 0);
+    doSetSessions(function (prev) {
+      return [].concat(_toConsumableArray(prev), [{
+        id: Date.now(),
+        date: new Date().toISOString(),
+        note: storeName.trim() || "Shopping trip",
+        items: items,
+        total: parseFloat(total.toFixed(2))
+      }]);
+    });
     clearCart();
-    setStoreName(""); setReceiptRows([{name:"",qty:1,price:""}]);
+    setStoreName("");
+    setReceiptRows([{
+      name: "",
+      qty: 1,
+      price: ""
+    }]);
     setTab("dashboard");
   };
 
   // ── DASHBOARD ───────────────────────────────────────────────────────────
-  const dash = useMemo(()=>{
+  var dash = useMemo(function () {
     if (!sessions.length) return null;
-    const now=new Date();
-    const trips=sessions.slice(-14).map(s=>({date:dateLbl(s.date),total:s.total,note:s.note}));
-    const catMap={};
-    sessions.forEach(s=>s.items.forEach(i=>{catMap[i.catId]=(catMap[i.catId]||0)+i.price*i.qty;}));
-    const byCategory=Object.entries(catMap).map(([id,v])=>({name:catOf(id).label,value:+v.toFixed(2),color:catOf(id).color})).sort((a,b)=>b.value-a.value);
-    const mf=(m,y)=>sessions.filter(s=>{const d=new Date(s.date);return d.getMonth()===m&&d.getFullYear()===y;});
-    const lm=new Date(now.getFullYear(),now.getMonth()-1);
-    const allTime=sessions.reduce((s,x)=>s+x.total,0);
-    return { trips, byCategory,
-      thisMonth:mf(now.getMonth(),now.getFullYear()).reduce((s,x)=>s+x.total,0),
-      lastMonth:mf(lm.getMonth(),lm.getFullYear()).reduce((s,x)=>s+x.total,0),
-      allTime, avg:allTime/sessions.length, count:sessions.length
+    var now = new Date();
+    var trips = sessions.slice(-14).map(function (s) {
+      return {
+        date: dateLbl(s.date),
+        total: s.total,
+        note: s.note
+      };
+    });
+    var catMap = {};
+    sessions.forEach(function (s) {
+      return s.items.forEach(function (i) {
+        catMap[i.catId] = (catMap[i.catId] || 0) + i.price * i.qty;
+      });
+    });
+    var byCategory = Object.entries(catMap).map(function (_ref4) {
+      var _ref5 = _slicedToArray(_ref4, 2),
+        id = _ref5[0],
+        v = _ref5[1];
+      return {
+        name: catOf(id).label,
+        value: +v.toFixed(2),
+        color: catOf(id).color
+      };
+    }).sort(function (a, b) {
+      return b.value - a.value;
+    });
+    var mf = function mf(m, y) {
+      return sessions.filter(function (s) {
+        var d = new Date(s.date);
+        return d.getMonth() === m && d.getFullYear() === y;
+      });
     };
-  },[sessions]);
+    var lm = new Date(now.getFullYear(), now.getMonth() - 1);
+    var allTime = sessions.reduce(function (s, x) {
+      return s + x.total;
+    }, 0);
+    return {
+      trips: trips,
+      byCategory: byCategory,
+      thisMonth: mf(now.getMonth(), now.getFullYear()).reduce(function (s, x) {
+        return s + x.total;
+      }, 0),
+      lastMonth: mf(lm.getMonth(), lm.getFullYear()).reduce(function (s, x) {
+        return s + x.total;
+      }, 0),
+      allTime: allTime,
+      avg: allTime / sessions.length,
+      count: sessions.length
+    };
+  }, [sessions]);
 
   // ── DERIVED ─────────────────────────────────────────────────────────────
-  const cartCount    = Object.keys(cart).length;
-  const checkedCount = Object.keys(checked).filter(k=>checked[k]&&cart[k]).length;
-  const grouped      = useMemo(()=>{const g={};Object.entries(cart).forEach(([key,val])=>{(g[val.catId]=g[val.catId]||[]).push({key,...val});});return g;},[cart]);
-  const currentCat    = ALL_CATS.find(c=>c.id===activeCat);
-  const displayItems  = activeCat==="custom" ? customItems.map(i=>i.name) : (currentCat?.items||[]);
-  const filteredItems = displayItems.filter(i=>i.toLowerCase().includes(search.toLowerCase()));
-  const receiptTotal  = receiptRows.reduce((s,r)=>s+(+r.price||0)*(+r.qty||1),0);
+  var cartCount = Object.keys(cart).length;
+  var checkedCount = Object.keys(checked).filter(function (k) {
+    return checked[k] && cart[k];
+  }).length;
+  var grouped = useMemo(function () {
+    var g = {};
+    Object.entries(cart).forEach(function (_ref6) {
+      var _ref7 = _slicedToArray(_ref6, 2),
+        key = _ref7[0],
+        val = _ref7[1];
+      (g[val.catId] = g[val.catId] || []).push(_objectSpread({
+        key: key
+      }, val));
+    });
+    return g;
+  }, [cart]);
+  var currentCat = ALL_CATS.find(function (c) {
+    return c.id === activeCat;
+  });
+  var displayItems = activeCat === "custom" ? customItems.map(function (i) {
+    return i.name;
+  }) : (currentCat === null || currentCat === void 0 ? void 0 : currentCat.items) || [];
+  var filteredItems = displayItems.filter(function (i) {
+    return i.toLowerCase().includes(search.toLowerCase());
+  });
+  var receiptTotal = receiptRows.reduce(function (s, r) {
+    return s + (+r.price || 0) * (+r.qty || 1);
+  }, 0);
 
   // ── STYLE TOKENS ────────────────────────────────────────────────────────
-  const card = {background:"#fff",borderRadius:12,border:"1.5px solid #e5e0d8",padding:"14px 16px"};
-  const inp  = {padding:"8px 11px",borderRadius:8,border:"1.5px solid #d5cfc5",background:"#fff",fontSize:13,outline:"none",width:"100%"};
-  const btn  = (bg="#1a3528",extra={}) => ({padding:"9px 16px",background:bg,color:"#f5f0e8",border:"none",borderRadius:9,cursor:"pointer",fontSize:13,fontWeight:"bold",...extra});
-
-  const syncColor = {idle:"transparent",loading:"#5b9ec9",saving:"#e8a040",saved:"#4a7c59",error:"#c0392b"}[syncStatus];
-  const syncIcon  = {idle:"",loading:"⏳",saving:"⏳",saved:"☁️",error:"⚠️"}[syncStatus];
+  var card = {
+    background: "#fff",
+    borderRadius: 12,
+    border: "1.5px solid #e5e0d8",
+    padding: "14px 16px"
+  };
+  var inp = {
+    padding: "8px 11px",
+    borderRadius: 8,
+    border: "1.5px solid #d5cfc5",
+    background: "#fff",
+    fontSize: 13,
+    outline: "none",
+    width: "100%"
+  };
+  var btn = function btn() {
+    var bg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "#1a3528";
+    var extra = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    return _objectSpread({
+      padding: "9px 16px",
+      background: bg,
+      color: "#f5f0e8",
+      border: "none",
+      borderRadius: 9,
+      cursor: "pointer",
+      fontSize: 13,
+      fontWeight: "bold"
+    }, extra);
+  };
+  var syncColor = {
+    idle: "transparent",
+    loading: "#5b9ec9",
+    saving: "#e8a040",
+    saved: "#4a7c59",
+    error: "#c0392b"
+  }[syncStatus];
+  var syncIcon = {
+    idle: "",
+    loading: "⏳",
+    saving: "⏳",
+    saved: "☁️",
+    error: "⚠️"
+  }[syncStatus];
 
   // ── SETUP MODAL ─────────────────────────────────────────────────────────
-  const SetupModal = ()=>(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:600,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
-      <div style={{background:"#fff",borderRadius:16,padding:24,maxWidth:440,width:"100%",boxShadow:"0 8px 32px rgba(0,0,0,0.3)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-          <span style={{fontSize:28}}>☁️</span>
-          <div>
-            <h2 style={{margin:0,fontSize:18,color:"#1a3528"}}>Connect to GitHub</h2>
-            <p style={{margin:0,fontSize:12,color:"#aaa"}}>Data saves to <strong>{REPO_OWNER}/{REPO_NAME}</strong></p>
-          </div>
-          {token && <button onClick={()=>setShowSetup(false)} style={{marginLeft:"auto",background:"none",border:"none",fontSize:22,cursor:"pointer",color:"#ccc"}}>×</button>}
-        </div>
-
-        <div style={{background:"#f5f9ff",border:"1.5px solid #c8dff5",borderRadius:8,padding:"10px 12px",marginBottom:14,fontSize:12,fontFamily:"sans-serif",color:"#3a6ea5",lineHeight:1.6}}>
-          <strong>How to get a token:</strong><br/>
-          GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens<br/>
-          → Repository: <strong>{REPO_NAME}</strong> → Permissions: <strong>Contents: Read & Write</strong>
-        </div>
-
-        <label style={{fontSize:12,color:"#666",display:"block",marginBottom:5}}>Personal Access Token</label>
-        <input type="password" value={tokenInput} onChange={e=>setTokenInput(e.target.value)}
-          placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-          style={{...inp,marginBottom:10,fontFamily:"monospace"}} />
-
-        {testMsg && (
-          <div style={{fontSize:13,padding:"8px 11px",borderRadius:8,marginBottom:10,
-            background:testMsg.ok?"#f0faf4":"#fdf0f0",color:testMsg.ok?"#4a7c59":"#c0392b",fontFamily:"sans-serif"}}>
-            {testMsg.msg}
-          </div>
-        )}
-
-        <div style={{display:"flex",gap:8}}>
-          <button onClick={testToken} disabled={testing||!tokenInput.trim()}
-            style={{...btn("#5b9ec9",{flex:1,opacity:!tokenInput.trim()||testing?0.5:1})}}>
-            {testing?"Testing…":"Test Connection"}
-          </button>
-          <button onClick={saveToken} disabled={!tokenInput.trim()}
-            style={{...btn("#4a7c59",{flex:1,opacity:!tokenInput.trim()?0.5:1})}}>
-            Connect
-          </button>
-        </div>
-
-        {token && (
-          <button onClick={clearToken}
-            style={{width:"100%",marginTop:10,padding:"7px",background:"transparent",border:"1.5px solid #f0ddd5",borderRadius:8,color:"#c0392b",cursor:"pointer",fontSize:12}}>
-            Disconnect This Browser
-          </button>
-        )}
-
-        <p style={{fontSize:11,color:"#bbb",marginTop:12,fontFamily:"sans-serif",lineHeight:1.5}}>
-          🔒 Your token is stored only in this browser's localStorage and sent only to GitHub.
-        </p>
-      </div>
-    </div>
-  );
+  var SetupModal = function SetupModal() {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.6)",
+        zIndex: 600,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "#fff",
+        borderRadius: 16,
+        padding: 24,
+        maxWidth: 440,
+        width: "100%",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.3)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        marginBottom: 12
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 28
+      }
+    }, "\u2601\uFE0F"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+      style: {
+        margin: 0,
+        fontSize: 18,
+        color: "#1a3528"
+      }
+    }, "Connect to GitHub"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontSize: 12,
+        color: "#aaa"
+      }
+    }, "Data saves to ", /*#__PURE__*/React.createElement("strong", null, REPO_OWNER, "/", REPO_NAME))), token && /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        return setShowSetup(false);
+      },
+      style: {
+        marginLeft: "auto",
+        background: "none",
+        border: "none",
+        fontSize: 22,
+        cursor: "pointer",
+        color: "#ccc"
+      }
+    }, "\xD7")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "#f5f9ff",
+        border: "1.5px solid #c8dff5",
+        borderRadius: 8,
+        padding: "10px 12px",
+        marginBottom: 14,
+        fontSize: 12,
+        fontFamily: "sans-serif",
+        color: "#3a6ea5",
+        lineHeight: 1.6
+      }
+    }, /*#__PURE__*/React.createElement("strong", null, "How to get a token:"), /*#__PURE__*/React.createElement("br", null), "GitHub \u2192 Settings \u2192 Developer settings \u2192 Personal access tokens \u2192 Fine-grained tokens", /*#__PURE__*/React.createElement("br", null), "\u2192 Repository: ", /*#__PURE__*/React.createElement("strong", null, REPO_NAME), " \u2192 Permissions: ", /*#__PURE__*/React.createElement("strong", null, "Contents: Read & Write")), /*#__PURE__*/React.createElement("label", {
+      style: {
+        fontSize: 12,
+        color: "#666",
+        display: "block",
+        marginBottom: 5
+      }
+    }, "Personal Access Token"), /*#__PURE__*/React.createElement("input", {
+      type: "password",
+      value: tokenInput,
+      onChange: function onChange(e) {
+        return setTokenInput(e.target.value);
+      },
+      placeholder: "ghp_xxxxxxxxxxxxxxxxxxxx",
+      style: _objectSpread(_objectSpread({}, inp), {}, {
+        marginBottom: 10,
+        fontFamily: "monospace"
+      })
+    }), testMsg && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        padding: "8px 11px",
+        borderRadius: 8,
+        marginBottom: 10,
+        background: testMsg.ok ? "#f0faf4" : "#fdf0f0",
+        color: testMsg.ok ? "#4a7c59" : "#c0392b",
+        fontFamily: "sans-serif"
+      }
+    }, testMsg.msg), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: testToken,
+      disabled: testing || !tokenInput.trim(),
+      style: _objectSpread({}, btn("#5b9ec9", {
+        flex: 1,
+        opacity: !tokenInput.trim() || testing ? 0.5 : 1
+      }))
+    }, testing ? "Testing…" : "Test Connection"), /*#__PURE__*/React.createElement("button", {
+      onClick: saveToken,
+      disabled: !tokenInput.trim(),
+      style: _objectSpread({}, btn("#4a7c59", {
+        flex: 1,
+        opacity: !tokenInput.trim() ? 0.5 : 1
+      }))
+    }, "Connect")), token && /*#__PURE__*/React.createElement("button", {
+      onClick: clearToken,
+      style: {
+        width: "100%",
+        marginTop: 10,
+        padding: "7px",
+        background: "transparent",
+        border: "1.5px solid #f0ddd5",
+        borderRadius: 8,
+        color: "#c0392b",
+        cursor: "pointer",
+        fontSize: 12
+      }
+    }, "Disconnect This Browser"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 11,
+        color: "#bbb",
+        marginTop: 12,
+        fontFamily: "sans-serif",
+        lineHeight: 1.5
+      }
+    }, "\uD83D\uDD12 Your token is stored only in this browser's localStorage and sent only to GitHub.")));
+  };
 
   // ── HEADER ──────────────────────────────────────────────────────────────
-  const Header = ()=>(
-    <div style={{background:"#1a3528",padding:"0 12px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:200,minHeight:52,boxShadow:"0 2px 14px rgba(0,0,0,0.3)"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,color:"#f5f0e8",minWidth:0}}>
-        <span style={{fontSize:20,flexShrink:0}}>🛒</span>
-        <span style={{fontSize:15,fontWeight:"bold",whiteSpace:"nowrap"}}>Market List</span>
-        {syncStatus!=="idle" && (
-          <span style={{fontFamily:"sans-serif",fontSize:10,color:syncColor,whiteSpace:"nowrap",marginLeft:4}}>
-            {syncIcon} {syncMsg}
-          </span>
-        )}
-      </div>
-      <div style={{display:"flex",gap:2,alignItems:"center",flexShrink:0}}>
-        {[
-          {id:"browse",  icon:"🏪", label:"Browse"},
-          {id:"list",    icon:"📋", label:cartCount?`List(${cartCount})`:"List"},
-          {id:"receipt", icon:"🧾", label:"Receipt"},
-          {id:"dashboard",icon:"📊",label:"Stats"},
-        ].map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)} style={{
-            padding:"4px 8px",borderRadius:11,border:"none",cursor:"pointer",
-            background:tab===t.id?"#4a7c59":"transparent",
-            color:"#f5f0e8",fontSize:11,whiteSpace:"nowrap"
-          }}>{t.icon} {t.label}</button>
-        ))}
-        <button onClick={()=>setShowSetup(true)} title="GitHub Settings"
-          style={{padding:"4px 7px",borderRadius:11,border:"none",cursor:"pointer",
-            background:!token?"#e8623a":"transparent",color:"#f5f0e8",fontSize:13}}>⚙️</button>
-      </div>
-    </div>
-  );
+  var Header = function Header() {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "#1a3528",
+        padding: "0 12px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        position: "sticky",
+        top: 0,
+        zIndex: 200,
+        minHeight: 52,
+        boxShadow: "0 2px 14px rgba(0,0,0,0.3)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        color: "#f5f0e8",
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 20,
+        flexShrink: 0
+      }
+    }, "\uD83D\uDED2"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 15,
+        fontWeight: "bold",
+        whiteSpace: "nowrap"
+      }
+    }, "Market List"), syncStatus !== "idle" && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: "sans-serif",
+        fontSize: 10,
+        color: syncColor,
+        whiteSpace: "nowrap",
+        marginLeft: 4
+      }
+    }, syncIcon, " ", syncMsg)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 2,
+        alignItems: "center",
+        flexShrink: 0
+      }
+    }, [{
+      id: "browse",
+      icon: "🏪",
+      label: "Browse"
+    }, {
+      id: "list",
+      icon: "📋",
+      label: cartCount ? "List(".concat(cartCount, ")") : "List"
+    }, {
+      id: "receipt",
+      icon: "🧾",
+      label: "Receipt"
+    }, {
+      id: "dashboard",
+      icon: "📊",
+      label: "Stats"
+    }].map(function (t) {
+      return /*#__PURE__*/React.createElement("button", {
+        key: t.id,
+        onClick: function onClick() {
+          return setTab(t.id);
+        },
+        style: {
+          padding: "4px 8px",
+          borderRadius: 11,
+          border: "none",
+          cursor: "pointer",
+          background: tab === t.id ? "#4a7c59" : "transparent",
+          color: "#f5f0e8",
+          fontSize: 11,
+          whiteSpace: "nowrap"
+        }
+      }, t.icon, " ", t.label);
+    }), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        return setShowSetup(true);
+      },
+      title: "GitHub Settings",
+      style: {
+        padding: "4px 7px",
+        borderRadius: 11,
+        border: "none",
+        cursor: "pointer",
+        background: !token ? "#e8623a" : "transparent",
+        color: "#f5f0e8",
+        fontSize: 13
+      }
+    }, "\u2699\uFE0F")));
+  };
 
   // ────────────────────────────────────────────────────────────────────────
-  return (
-    <div style={{minHeight:"100vh"}}>
-      {showSetup && <SetupModal />}
-      <Header />
-
-      {/* ── BROWSE ── */}
-      {tab==="browse" && (
-        <div style={{display:"flex",height:"calc(100vh - 52px)"}}>
-          {/* Sidebar */}
-          <div style={{width:106,background:"#1a3528",overflowY:"auto",display:"flex",flexDirection:"column",gap:2,padding:"5px 3px",flexShrink:0}}>
-            {ALL_CATS.map(cat=>{
-              const n=Object.values(cart).filter(v=>v.catId===cat.id).length;
-              return (
-                <button key={cat.id} onClick={()=>{setActiveCat(cat.id);setSearch("");}} style={{
-                  background:activeCat===cat.id?cat.color:"rgba(255,255,255,0.04)",
-                  border:"none",borderRadius:7,padding:"6px 3px",cursor:"pointer",
-                  color:"#f5f0e8",textAlign:"center",position:"relative",
-                }}>
-                  <div style={{fontSize:17}}>{cat.emoji}</div>
-                  <div style={{fontSize:9,marginTop:2,lineHeight:1.3}}>{cat.label}</div>
-                  {n>0&&<span style={{position:"absolute",top:2,right:2,background:"#e8623a",color:"white",borderRadius:"50%",width:13,height:13,fontSize:8,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:"bold"}}>{n}</span>}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Items */}
-          <div style={{flex:1,overflowY:"auto",padding:12}}>
-            <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:8}}>
-              <span style={{fontSize:20}}>{currentCat?.emoji}</span>
-              <div>
-                <h2 style={{margin:0,fontSize:16,color:"#1a3528"}}>{currentCat?.label}</h2>
-                <p style={{margin:0,fontSize:10,color:"#aaa",fontFamily:"sans-serif"}}>Tap to add · tap again to remove</p>
-              </div>
-            </div>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search items…"
-              style={{...inp,marginBottom:8}} />
-            {activeCat==="custom"&&(
-              <div style={{display:"flex",gap:7,marginBottom:8}}>
-                <input value={customIn} onChange={e=>setCustomIn(e.target.value)}
-                  onKeyDown={e=>e.key==="Enter"&&addCustom(customIn)}
-                  placeholder="New custom item…" style={{...inp}} />
-                <button onClick={()=>addCustom(customIn)} style={{...btn(),padding:"8px 13px",whiteSpace:"nowrap"}}>Add</button>
-              </div>
-            )}
-            {filteredItems.length===0&&<p style={{color:"#bbb",fontSize:12,fontFamily:"sans-serif"}}>{search?`No items match "${search}"`:activeCat==="custom"?"No custom items yet.":""}</p>}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:7}}>
-              {filteredItems.map(name=>{
-                const key=`${activeCat}::${name}`,sel=!!cart[key],c=currentCat?.color||"#888";
-                return (
-                  <button key={name} onClick={()=>toggleItem(activeCat,name)} style={{
-                    padding:"8px 7px",borderRadius:9,border:`2px solid ${sel?c:"#e0dbd2"}`,
-                    background:sel?`${c}14`:"#fff",cursor:"pointer",textAlign:"left",
-                    fontSize:12,color:sel?c:"#444",fontWeight:sel?"600":"400",
-                    display:"flex",alignItems:"center",gap:5,transition:"all 0.12s",
-                    boxShadow:sel?`0 2px 8px ${c}20`:"0 1px 3px rgba(0,0,0,0.05)",
-                  }}>
-                    <span style={{fontSize:11,flexShrink:0}}>{sel?"✓":"+"}</span>{name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── LIST ── */}
-      {tab==="list"&&(
-        <div style={{maxWidth:580,margin:"0 auto",padding:"13px 12px",paddingBottom:82}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-            <div>
-              <h2 style={{margin:0,fontSize:18,color:"#1a3528"}}>Shopping List</h2>
-              <p style={{margin:"2px 0 0",fontSize:11,fontFamily:"sans-serif",color:"#aaa"}}>
-                {cartCount===0?"Empty — browse to add items":`${checkedCount}/${cartCount} checked off`}
-              </p>
-            </div>
-            {cartCount>0&&<button onClick={clearCart} style={{padding:"4px 10px",borderRadius:11,border:"1.5px solid #e0dbd2",background:"transparent",cursor:"pointer",fontSize:11,color:"#bbb"}}>Clear all</button>}
-          </div>
-
-          <div style={{display:"flex",gap:7,marginBottom:10,...card,padding:"7px 10px"}}>
-            <input value={customIn} onChange={e=>setCustomIn(e.target.value)}
-              onKeyDown={e=>e.key==="Enter"&&addCustom(customIn)}
-              placeholder="Add custom item…"
-              style={{flex:1,border:"none",outline:"none",fontSize:12,background:"transparent"}} />
-            <button onClick={()=>addCustom(customIn)} style={{...btn(),padding:"4px 11px",fontSize:11}}>Add</button>
-          </div>
-
-          {cartCount===0?(
-            <div style={{textAlign:"center",padding:"40px 0",fontFamily:"sans-serif",color:"#ccc"}}>
-              <div style={{fontSize:38}}>🛒</div><p style={{marginTop:8}}>Your list is empty</p>
-              <button onClick={()=>setTab("browse")} style={{...btn(),marginTop:12,fontSize:12,padding:"7px 16px",borderRadius:13}}>Browse Items</button>
-            </div>
-          ):(
-            Object.entries(grouped).map(([catId,items])=>{
-              const cat=catOf(catId);
-              return (
-                <div key={catId} style={{marginBottom:14}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6,paddingBottom:4,borderBottom:`2px solid ${cat.color}`}}>
-                    <span style={{fontSize:13}}>{cat.emoji}</span>
-                    <span style={{fontWeight:"bold",color:cat.color,fontSize:12}}>{cat.label}</span>
-                    <span style={{marginLeft:"auto",fontFamily:"sans-serif",fontSize:10,color:"#bbb"}}>{items.length} item{items.length!==1?"s":""}</span>
-                  </div>
-                  {items.map(({key,item,qty,unit})=>{
-                    const chk=!!checked[key];
-                    return (
-                      <div key={key} style={{display:"flex",alignItems:"center",gap:7,...card,padding:"7px 10px",marginBottom:4,opacity:chk?0.45:1,transition:"opacity 0.2s"}}>
-                        <button onClick={()=>setChecked(p=>({...p,[key]:!p[key]}))} style={{width:18,height:18,borderRadius:4,flexShrink:0,border:`2px solid ${chk?cat.color:"#ccc"}`,background:chk?cat.color:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:10}}>{chk?"✓":""}</button>
-                        <span style={{flex:1,fontSize:12,textDecoration:chk?"line-through":"none",color:chk?"#bbb":"#2c2c2c"}}>{item}</span>
-                        <input type="number" min="1" value={qty} onChange={e=>setCartField(key,"qty",Math.max(1,parseInt(e.target.value)||1))} style={{width:34,textAlign:"center",border:"1px solid #e0dbd2",borderRadius:5,padding:"2px",fontFamily:"sans-serif",fontSize:11,background:"#faf7f2"}} />
-                        <select value={unit} onChange={e=>setCartField(key,"unit",e.target.value)} style={{border:"1px solid #e0dbd2",borderRadius:5,padding:"2px 3px",fontSize:10,background:"#faf7f2",color:"#666"}}>
-                          {UNITS.map(u=><option key={u}>{u}</option>)}
-                        </select>
-                        <button onClick={()=>removeItem(key)} style={{background:"none",border:"none",color:"#ccc",cursor:"pointer",fontSize:16,padding:1,lineHeight:1}}>×</button>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })
-          )}
-
-          {cartCount>0&&(
-            <div style={{position:"fixed",bottom:0,left:0,right:0,background:"#1a3528",padding:"8px 13px",display:"flex",alignItems:"center",gap:9,zIndex:100}}>
-              <div style={{flex:1,height:4,background:"rgba(255,255,255,0.18)",borderRadius:2}}>
-                <div style={{height:"100%",borderRadius:2,background:"#4a7c59",width:`${cartCount?(checkedCount/cartCount)*100:0}%`,transition:"width 0.3s"}} />
-              </div>
-              <span style={{color:"#f5f0e8",fontFamily:"sans-serif",fontSize:11,whiteSpace:"nowrap"}}>{checkedCount}/{cartCount}</span>
-              <button onClick={()=>setTab("receipt")} style={{...btn("#4a7c59",{padding:"5px 12px",borderRadius:11,fontSize:11,whiteSpace:"nowrap"})}}>Log Receipt →</button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── RECEIPT ── */}
-      {tab==="receipt"&&(
-        <div style={{maxWidth:560,margin:"0 auto",padding:"14px 12px"}}>
-          <h2 style={{fontSize:18,color:"#1a3528",marginBottom:4}}>🧾 Log Receipt</h2>
-          <p style={{fontFamily:"sans-serif",fontSize:12,color:"#888",marginBottom:14}}>Enter items from your receipt — they'll be saved to your spending history in GitHub.</p>
-
-          <input value={storeName} onChange={e=>setStoreName(e.target.value)}
-            placeholder="Store name (e.g. Tesco, Lidl, Aldi)"
-            style={{...inp,marginBottom:12}} />
-
-          {/* Receipt rows */}
-          <div style={{...card,padding:"10px 12px",marginBottom:10}}>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 60px 80px 28px",gap:6,marginBottom:8}}>
-              {["Item","Qty","Price (£)",""].map((h,i)=>(
-                <span key={i} style={{fontFamily:"sans-serif",fontSize:10,color:"#aaa",fontWeight:"bold"}}>{h}</span>
-              ))}
-            </div>
-            {receiptRows.map((row,i)=>(
-              <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 60px 80px 28px",gap:6,marginBottom:6}}>
-                <input value={row.name} onChange={e=>setReceiptCell(i,"name",e.target.value)}
-                  placeholder="Item name" style={{...inp,padding:"6px 9px",fontSize:12}} />
-                <input type="number" min="1" value={row.qty} onChange={e=>setReceiptCell(i,"qty",e.target.value)}
-                  style={{...inp,padding:"6px 7px",fontSize:12,textAlign:"center"}} />
-                <input type="number" min="0" step="0.01" value={row.price} onChange={e=>setReceiptCell(i,"price",e.target.value)}
-                  placeholder="0.00" style={{...inp,padding:"6px 7px",fontSize:12,textAlign:"right"}} />
-                <button onClick={()=>removeReceiptRow(i)} style={{background:"none",border:"none",color:"#ccc",cursor:"pointer",fontSize:16,padding:2}}>{receiptRows.length>1?"×":""}</button>
-              </div>
-            ))}
-            <button onClick={addReceiptRow} style={{...btn("transparent",{color:"#4a7c59",border:"1.5px dashed #c5ddc8",borderRadius:8,width:"100%",fontSize:12,padding:"6px"})}}>+ Add row</button>
-          </div>
-
-          {receiptTotal>0&&(
-            <div style={{display:"flex",justifyContent:"space-between",...card,padding:"10px 14px",marginBottom:12,fontWeight:"bold",background:"#f5f0e8"}}>
-              <span>Total</span>
-              <span style={{fontFamily:"sans-serif",fontSize:15,color:"#1a3528"}}>{fmt(receiptTotal)}</span>
-            </div>
-          )}
-
-          <button onClick={saveReceipt}
-            disabled={!receiptRows.some(r=>r.name.trim()&&+r.price>0)}
-            style={{...btn("#4a7c59",{width:"100%",opacity:receiptRows.some(r=>r.name.trim()&&+r.price>0)?1:0.45})}}>
-            ☁️ Save to GitHub
-          </button>
-        </div>
-      )}
-
-      {/* ── DASHBOARD ── */}
-      {tab==="dashboard"&&(
-        <div style={{maxWidth:660,margin:"0 auto",padding:"14px 12px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-            <h2 style={{fontSize:18,color:"#1a3528",margin:0}}>📊 Spending Dashboard</h2>
-            <span style={{fontFamily:"sans-serif",fontSize:10,color:"#aaa"}}>☁️ {REPO_OWNER}/{REPO_NAME}</span>
-          </div>
-
-          {!dash?(
-            <div style={{textAlign:"center",padding:"44px 0",fontFamily:"sans-serif",color:"#ccc"}}>
-              <div style={{fontSize:40}}>📊</div>
-              <p style={{marginTop:8}}>No spending data yet.</p>
-              <button onClick={()=>setTab("receipt")} style={{...btn(),marginTop:12,fontSize:12,padding:"7px 16px",borderRadius:13}}>Log First Receipt</button>
-            </div>
-          ):(
-            <>
-              {/* Stat cards */}
-              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
-                {[
-                  {label:"This Month",  val:fmt(dash.thisMonth),emoji:"📅"},
-                  {label:"Last Month",  val:fmt(dash.lastMonth),emoji:"📆"},
-                  {label:"Avg Trip",    val:fmt(dash.avg),      emoji:"🧾"},
-                  {label:"All Time",    val:fmt(dash.allTime),  emoji:"🏦"},
-                ].map(s=>(
-                  <div key={s.label} style={{...card,textAlign:"center",padding:"10px 5px"}}>
-                    <div style={{fontSize:16}}>{s.emoji}</div>
-                    <div style={{fontFamily:"sans-serif",fontSize:14,fontWeight:"bold",color:"#1a3528",marginTop:3}}>{s.val}</div>
-                    <div style={{fontFamily:"sans-serif",fontSize:9,color:"#aaa",marginTop:2}}>{s.label}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Bar chart */}
-              {dash.trips.length>0&&(
-                <div style={{...card,marginBottom:11}}>
-                  <h3 style={{margin:"0 0 9px",fontSize:12,color:"#1a3528",fontFamily:"sans-serif"}}>Spend Per Trip</h3>
-                  <ResponsiveContainer width="100%" height={138}>
-                    <BarChart data={dash.trips} margin={{top:3,right:6,bottom:3,left:0}}>
-                      <XAxis dataKey="date" tick={{fontSize:9,fontFamily:"sans-serif"}} />
-                      <YAxis tick={{fontSize:9,fontFamily:"sans-serif"}} tickFormatter={v=>`£${v}`} width={36} />
-                      <Tooltip formatter={v=>[`£${v.toFixed(2)}`,"Spent"]} contentStyle={{fontFamily:"sans-serif",fontSize:10}} />
-                      <Bar dataKey="total" fill="#4a7c59" radius={[3,3,0,0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-
-              {/* Pie */}
-              {dash.byCategory.length>0&&(
-                <div style={{...card,marginBottom:11}}>
-                  <h3 style={{margin:"0 0 9px",fontSize:12,color:"#1a3528",fontFamily:"sans-serif"}}>By Category (all time)</h3>
-                  <div style={{display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
-                    <ResponsiveContainer width={155} height={155}>
-                      <PieChart>
-                        <Pie data={dash.byCategory} dataKey="value" cx="50%" cy="50%" outerRadius={70} innerRadius={30}>
-                          {dash.byCategory.map((e,i)=><Cell key={i} fill={e.color}/>)}
-                        </Pie>
-                        <Tooltip formatter={v=>[fmt(v)]} contentStyle={{fontFamily:"sans-serif",fontSize:10}}/>
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div style={{flex:1,display:"flex",flexDirection:"column",gap:5}}>
-                      {dash.byCategory.map((c,i)=>(
-                        <div key={i} style={{display:"flex",alignItems:"center",gap:7,fontFamily:"sans-serif",fontSize:11}}>
-                          <div style={{width:9,height:9,borderRadius:2,background:c.color,flexShrink:0}}/>
-                          <span style={{flex:1,color:"#555"}}>{c.name}</span>
-                          <span style={{fontWeight:"bold",color:"#1a3528"}}>{fmt(c.value)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* History */}
-              <div style={card}>
-                <h3 style={{margin:"0 0 9px",fontSize:12,color:"#1a3528",fontFamily:"sans-serif"}}>History · {dash.count} trip{dash.count!==1?"s":""}</h3>
-                {[...sessions].reverse().slice(0,15).map(s=>(
-                  <div key={s.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:"1px solid #f2ede5"}}>
-                    <div>
-                      <div style={{fontSize:12,fontWeight:"600"}}>{s.note}</div>
-                      <div style={{fontFamily:"sans-serif",fontSize:10,color:"#aaa",marginTop:1}}>
-                        {new Date(s.date).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"})} · {s.items.length} items
-                      </div>
-                    </div>
-                    <div style={{fontFamily:"sans-serif",fontWeight:"bold",fontSize:13,color:"#1a3528"}}>{fmt(s.total)}</div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: "100vh"
+    }
+  }, showSetup && /*#__PURE__*/React.createElement(SetupModal, null), /*#__PURE__*/React.createElement(Header, null), tab === "browse" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      height: "calc(100vh - 52px)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 106,
+      background: "#1a3528",
+      overflowY: "auto",
+      display: "flex",
+      flexDirection: "column",
+      gap: 2,
+      padding: "5px 3px",
+      flexShrink: 0
+    }
+  }, ALL_CATS.map(function (cat) {
+    var n = Object.values(cart).filter(function (v) {
+      return v.catId === cat.id;
+    }).length;
+    return /*#__PURE__*/React.createElement("button", {
+      key: cat.id,
+      onClick: function onClick() {
+        setActiveCat(cat.id);
+        setSearch("");
+      },
+      style: {
+        background: activeCat === cat.id ? cat.color : "rgba(255,255,255,0.04)",
+        border: "none",
+        borderRadius: 7,
+        padding: "6px 3px",
+        cursor: "pointer",
+        color: "#f5f0e8",
+        textAlign: "center",
+        position: "relative"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 17
+      }
+    }, cat.emoji), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        marginTop: 2,
+        lineHeight: 1.3
+      }
+    }, cat.label), n > 0 && /*#__PURE__*/React.createElement("span", {
+      style: {
+        position: "absolute",
+        top: 2,
+        right: 2,
+        background: "#e8623a",
+        color: "white",
+        borderRadius: "50%",
+        width: 13,
+        height: 13,
+        fontSize: 8,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: "bold"
+      }
+    }, n));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: "auto",
+      padding: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 9,
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 20
+    }
+  }, currentCat === null || currentCat === void 0 ? void 0 : currentCat.emoji), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      margin: 0,
+      fontSize: 16,
+      color: "#1a3528"
+    }
+  }, currentCat === null || currentCat === void 0 ? void 0 : currentCat.label), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 10,
+      color: "#aaa",
+      fontFamily: "sans-serif"
+    }
+  }, "Tap to add \xB7 tap again to remove"))), /*#__PURE__*/React.createElement("input", {
+    value: search,
+    onChange: function onChange(e) {
+      return setSearch(e.target.value);
+    },
+    placeholder: "Search items\u2026",
+    style: _objectSpread(_objectSpread({}, inp), {}, {
+      marginBottom: 8
+    })
+  }), activeCat === "custom" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 7,
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: customIn,
+    onChange: function onChange(e) {
+      return setCustomIn(e.target.value);
+    },
+    onKeyDown: function onKeyDown(e) {
+      return e.key === "Enter" && addCustom(customIn);
+    },
+    placeholder: "New custom item\u2026",
+    style: _objectSpread({}, inp)
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return addCustom(customIn);
+    },
+    style: _objectSpread(_objectSpread({}, btn()), {}, {
+      padding: "8px 13px",
+      whiteSpace: "nowrap"
+    })
+  }, "Add")), filteredItems.length === 0 && /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: "#bbb",
+      fontSize: 12,
+      fontFamily: "sans-serif"
+    }
+  }, search ? "No items match \"".concat(search, "\"") : activeCat === "custom" ? "No custom items yet." : ""), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill,minmax(120px,1fr))",
+      gap: 7
+    }
+  }, filteredItems.map(function (name) {
+    var key = "".concat(activeCat, "::").concat(name),
+      sel = !!cart[key],
+      c = (currentCat === null || currentCat === void 0 ? void 0 : currentCat.color) || "#888";
+    return /*#__PURE__*/React.createElement("button", {
+      key: name,
+      onClick: function onClick() {
+        return toggleItem(activeCat, name);
+      },
+      style: {
+        padding: "8px 7px",
+        borderRadius: 9,
+        border: "2px solid ".concat(sel ? c : "#e0dbd2"),
+        background: sel ? "".concat(c, "14") : "#fff",
+        cursor: "pointer",
+        textAlign: "left",
+        fontSize: 12,
+        color: sel ? c : "#444",
+        fontWeight: sel ? "600" : "400",
+        display: "flex",
+        alignItems: "center",
+        gap: 5,
+        transition: "all 0.12s",
+        boxShadow: sel ? "0 2px 8px ".concat(c, "20") : "0 1px 3px rgba(0,0,0,0.05)"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        flexShrink: 0
+      }
+    }, sel ? "✓" : "+"), name);
+  })))), tab === "list" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 580,
+      margin: "0 auto",
+      padding: "13px 12px",
+      paddingBottom: 82
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      margin: 0,
+      fontSize: 18,
+      color: "#1a3528"
+    }
+  }, "Shopping List"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "2px 0 0",
+      fontSize: 11,
+      fontFamily: "sans-serif",
+      color: "#aaa"
+    }
+  }, cartCount === 0 ? "Empty — browse to add items" : "".concat(checkedCount, "/").concat(cartCount, " checked off"))), cartCount > 0 && /*#__PURE__*/React.createElement("button", {
+    onClick: clearCart,
+    style: {
+      padding: "4px 10px",
+      borderRadius: 11,
+      border: "1.5px solid #e0dbd2",
+      background: "transparent",
+      cursor: "pointer",
+      fontSize: 11,
+      color: "#bbb"
+    }
+  }, "Clear all")), /*#__PURE__*/React.createElement("div", {
+    style: _objectSpread(_objectSpread({
+      display: "flex",
+      gap: 7,
+      marginBottom: 10
+    }, card), {}, {
+      padding: "7px 10px"
+    })
+  }, /*#__PURE__*/React.createElement("input", {
+    value: customIn,
+    onChange: function onChange(e) {
+      return setCustomIn(e.target.value);
+    },
+    onKeyDown: function onKeyDown(e) {
+      return e.key === "Enter" && addCustom(customIn);
+    },
+    placeholder: "Add custom item\u2026",
+    style: {
+      flex: 1,
+      border: "none",
+      outline: "none",
+      fontSize: 12,
+      background: "transparent"
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return addCustom(customIn);
+    },
+    style: _objectSpread(_objectSpread({}, btn()), {}, {
+      padding: "4px 11px",
+      fontSize: 11
+    })
+  }, "Add")), cartCount === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: "40px 0",
+      fontFamily: "sans-serif",
+      color: "#ccc"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 38
+    }
+  }, "\uD83D\uDED2"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 8
+    }
+  }, "Your list is empty"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setTab("browse");
+    },
+    style: _objectSpread(_objectSpread({}, btn()), {}, {
+      marginTop: 12,
+      fontSize: 12,
+      padding: "7px 16px",
+      borderRadius: 13
+    })
+  }, "Browse Items")) : Object.entries(grouped).map(function (_ref8) {
+    var _ref9 = _slicedToArray(_ref8, 2),
+      catId = _ref9[0],
+      items = _ref9[1];
+    var cat = catOf(catId);
+    return /*#__PURE__*/React.createElement("div", {
+      key: catId,
+      style: {
+        marginBottom: 14
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        marginBottom: 6,
+        paddingBottom: 4,
+        borderBottom: "2px solid ".concat(cat.color)
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 13
+      }
+    }, cat.emoji), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: "bold",
+        color: cat.color,
+        fontSize: 12
+      }
+    }, cat.label), /*#__PURE__*/React.createElement("span", {
+      style: {
+        marginLeft: "auto",
+        fontFamily: "sans-serif",
+        fontSize: 10,
+        color: "#bbb"
+      }
+    }, items.length, " item", items.length !== 1 ? "s" : "")), items.map(function (_ref0) {
+      var key = _ref0.key,
+        item = _ref0.item,
+        qty = _ref0.qty,
+        unit = _ref0.unit;
+      var chk = !!checked[key];
+      return /*#__PURE__*/React.createElement("div", {
+        key: key,
+        style: _objectSpread(_objectSpread({
+          display: "flex",
+          alignItems: "center",
+          gap: 7
+        }, card), {}, {
+          padding: "7px 10px",
+          marginBottom: 4,
+          opacity: chk ? 0.45 : 1,
+          transition: "opacity 0.2s"
+        })
+      }, /*#__PURE__*/React.createElement("button", {
+        onClick: function onClick() {
+          return setChecked(function (p) {
+            return _objectSpread(_objectSpread({}, p), {}, _defineProperty({}, key, !p[key]));
+          });
+        },
+        style: {
+          width: 18,
+          height: 18,
+          borderRadius: 4,
+          flexShrink: 0,
+          border: "2px solid ".concat(chk ? cat.color : "#ccc"),
+          background: chk ? cat.color : "transparent",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          fontSize: 10
+        }
+      }, chk ? "✓" : ""), /*#__PURE__*/React.createElement("span", {
+        style: {
+          flex: 1,
+          fontSize: 12,
+          textDecoration: chk ? "line-through" : "none",
+          color: chk ? "#bbb" : "#2c2c2c"
+        }
+      }, item), /*#__PURE__*/React.createElement("input", {
+        type: "number",
+        min: "1",
+        value: qty,
+        onChange: function onChange(e) {
+          return setCartField(key, "qty", Math.max(1, parseInt(e.target.value) || 1));
+        },
+        style: {
+          width: 34,
+          textAlign: "center",
+          border: "1px solid #e0dbd2",
+          borderRadius: 5,
+          padding: "2px",
+          fontFamily: "sans-serif",
+          fontSize: 11,
+          background: "#faf7f2"
+        }
+      }), /*#__PURE__*/React.createElement("select", {
+        value: unit,
+        onChange: function onChange(e) {
+          return setCartField(key, "unit", e.target.value);
+        },
+        style: {
+          border: "1px solid #e0dbd2",
+          borderRadius: 5,
+          padding: "2px 3px",
+          fontSize: 10,
+          background: "#faf7f2",
+          color: "#666"
+        }
+      }, UNITS.map(function (u) {
+        return /*#__PURE__*/React.createElement("option", {
+          key: u
+        }, u);
+      })), /*#__PURE__*/React.createElement("button", {
+        onClick: function onClick() {
+          return removeItem(key);
+        },
+        style: {
+          background: "none",
+          border: "none",
+          color: "#ccc",
+          cursor: "pointer",
+          fontSize: 16,
+          padding: 1,
+          lineHeight: 1
+        }
+      }, "\xD7"));
+    }));
+  }), cartCount > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      background: "#1a3528",
+      padding: "8px 13px",
+      display: "flex",
+      alignItems: "center",
+      gap: 9,
+      zIndex: 100
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 4,
+      background: "rgba(255,255,255,0.18)",
+      borderRadius: 2
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: "100%",
+      borderRadius: 2,
+      background: "#4a7c59",
+      width: "".concat(cartCount ? checkedCount / cartCount * 100 : 0, "%"),
+      transition: "width 0.3s"
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#f5f0e8",
+      fontFamily: "sans-serif",
+      fontSize: 11,
+      whiteSpace: "nowrap"
+    }
+  }, checkedCount, "/", cartCount), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setTab("receipt");
+    },
+    style: _objectSpread({}, btn("#4a7c59", {
+      padding: "5px 12px",
+      borderRadius: 11,
+      fontSize: 11,
+      whiteSpace: "nowrap"
+    }))
+  }, "Log Receipt \u2192"))), tab === "receipt" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 560,
+      margin: "0 auto",
+      padding: "14px 12px"
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontSize: 18,
+      color: "#1a3528",
+      marginBottom: 4
+    }
+  }, "\uD83E\uDDFE Log Receipt"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: "sans-serif",
+      fontSize: 12,
+      color: "#888",
+      marginBottom: 14
+    }
+  }, "Enter items from your receipt \u2014 they'll be saved to your spending history in GitHub."), /*#__PURE__*/React.createElement("input", {
+    value: storeName,
+    onChange: function onChange(e) {
+      return setStoreName(e.target.value);
+    },
+    placeholder: "Store name (e.g. Tesco, Lidl, Aldi)",
+    style: _objectSpread(_objectSpread({}, inp), {}, {
+      marginBottom: 12
+    })
+  }), /*#__PURE__*/React.createElement("div", {
+    style: _objectSpread(_objectSpread({}, card), {}, {
+      padding: "10px 12px",
+      marginBottom: 10
+    })
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 60px 80px 28px",
+      gap: 6,
+      marginBottom: 8
+    }
+  }, ["Item", "Qty", "Price (£)", ""].map(function (h, i) {
+    return /*#__PURE__*/React.createElement("span", {
+      key: i,
+      style: {
+        fontFamily: "sans-serif",
+        fontSize: 10,
+        color: "#aaa",
+        fontWeight: "bold"
+      }
+    }, h);
+  })), receiptRows.map(function (row, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "grid",
+        gridTemplateColumns: "1fr 60px 80px 28px",
+        gap: 6,
+        marginBottom: 6
+      }
+    }, /*#__PURE__*/React.createElement("input", {
+      value: row.name,
+      onChange: function onChange(e) {
+        return setReceiptCell(i, "name", e.target.value);
+      },
+      placeholder: "Item name",
+      style: _objectSpread(_objectSpread({}, inp), {}, {
+        padding: "6px 9px",
+        fontSize: 12
+      })
+    }), /*#__PURE__*/React.createElement("input", {
+      type: "number",
+      min: "1",
+      value: row.qty,
+      onChange: function onChange(e) {
+        return setReceiptCell(i, "qty", e.target.value);
+      },
+      style: _objectSpread(_objectSpread({}, inp), {}, {
+        padding: "6px 7px",
+        fontSize: 12,
+        textAlign: "center"
+      })
+    }), /*#__PURE__*/React.createElement("input", {
+      type: "number",
+      min: "0",
+      step: "0.01",
+      value: row.price,
+      onChange: function onChange(e) {
+        return setReceiptCell(i, "price", e.target.value);
+      },
+      placeholder: "0.00",
+      style: _objectSpread(_objectSpread({}, inp), {}, {
+        padding: "6px 7px",
+        fontSize: 12,
+        textAlign: "right"
+      })
+    }), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        return removeReceiptRow(i);
+      },
+      style: {
+        background: "none",
+        border: "none",
+        color: "#ccc",
+        cursor: "pointer",
+        fontSize: 16,
+        padding: 2
+      }
+    }, receiptRows.length > 1 ? "×" : ""));
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: addReceiptRow,
+    style: _objectSpread({}, btn("transparent", {
+      color: "#4a7c59",
+      border: "1.5px dashed #c5ddc8",
+      borderRadius: 8,
+      width: "100%",
+      fontSize: 12,
+      padding: "6px"
+    }))
+  }, "+ Add row")), receiptTotal > 0 && /*#__PURE__*/React.createElement("div", {
+    style: _objectSpread(_objectSpread({
+      display: "flex",
+      justifyContent: "space-between"
+    }, card), {}, {
+      padding: "10px 14px",
+      marginBottom: 12,
+      fontWeight: "bold",
+      background: "#f5f0e8"
+    })
+  }, /*#__PURE__*/React.createElement("span", null, "Total"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "sans-serif",
+      fontSize: 15,
+      color: "#1a3528"
+    }
+  }, fmt(receiptTotal))), /*#__PURE__*/React.createElement("button", {
+    onClick: saveReceipt,
+    disabled: !receiptRows.some(function (r) {
+      return r.name.trim() && +r.price > 0;
+    }),
+    style: _objectSpread({}, btn("#4a7c59", {
+      width: "100%",
+      opacity: receiptRows.some(function (r) {
+        return r.name.trim() && +r.price > 0;
+      }) ? 1 : 0.45
+    }))
+  }, "\u2601\uFE0F Save to GitHub")), tab === "dashboard" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 660,
+      margin: "0 auto",
+      padding: "14px 12px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontSize: 18,
+      color: "#1a3528",
+      margin: 0
+    }
+  }, "\uD83D\uDCCA Spending Dashboard"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "sans-serif",
+      fontSize: 10,
+      color: "#aaa"
+    }
+  }, "\u2601\uFE0F ", REPO_OWNER, "/", REPO_NAME)), !dash ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: "44px 0",
+      fontFamily: "sans-serif",
+      color: "#ccc"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 40
+    }
+  }, "\uD83D\uDCCA"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 8
+    }
+  }, "No spending data yet."), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setTab("receipt");
+    },
+    style: _objectSpread(_objectSpread({}, btn()), {}, {
+      marginTop: 12,
+      fontSize: 12,
+      padding: "7px 16px",
+      borderRadius: 13
+    })
+  }, "Log First Receipt")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(4,1fr)",
+      gap: 8,
+      marginBottom: 12
+    }
+  }, [{
+    label: "This Month",
+    val: fmt(dash.thisMonth),
+    emoji: "📅"
+  }, {
+    label: "Last Month",
+    val: fmt(dash.lastMonth),
+    emoji: "📆"
+  }, {
+    label: "Avg Trip",
+    val: fmt(dash.avg),
+    emoji: "🧾"
+  }, {
+    label: "All Time",
+    val: fmt(dash.allTime),
+    emoji: "🏦"
+  }].map(function (s) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: s.label,
+      style: _objectSpread(_objectSpread({}, card), {}, {
+        textAlign: "center",
+        padding: "10px 5px"
+      })
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 16
+      }
+    }, s.emoji), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: "sans-serif",
+        fontSize: 14,
+        fontWeight: "bold",
+        color: "#1a3528",
+        marginTop: 3
+      }
+    }, s.val), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: "sans-serif",
+        fontSize: 9,
+        color: "#aaa",
+        marginTop: 2
+      }
+    }, s.label));
+  })), dash.trips.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: _objectSpread(_objectSpread({}, card), {}, {
+      marginBottom: 11
+    })
+  }, /*#__PURE__*/React.createElement("h3", {
+    style: {
+      margin: "0 0 9px",
+      fontSize: 12,
+      color: "#1a3528",
+      fontFamily: "sans-serif"
+    }
+  }, "Spend Per Trip"), /*#__PURE__*/React.createElement(ResponsiveContainer, {
+    width: "100%",
+    height: 138
+  }, /*#__PURE__*/React.createElement(BarChart, {
+    data: dash.trips,
+    margin: {
+      top: 3,
+      right: 6,
+      bottom: 3,
+      left: 0
+    }
+  }, /*#__PURE__*/React.createElement(XAxis, {
+    dataKey: "date",
+    tick: {
+      fontSize: 9,
+      fontFamily: "sans-serif"
+    }
+  }), /*#__PURE__*/React.createElement(YAxis, {
+    tick: {
+      fontSize: 9,
+      fontFamily: "sans-serif"
+    },
+    tickFormatter: function tickFormatter(v) {
+      return "\xA3".concat(v);
+    },
+    width: 36
+  }), /*#__PURE__*/React.createElement(Tooltip, {
+    formatter: function formatter(v) {
+      return ["\xA3".concat(v.toFixed(2)), "Spent"];
+    },
+    contentStyle: {
+      fontFamily: "sans-serif",
+      fontSize: 10
+    }
+  }), /*#__PURE__*/React.createElement(Bar, {
+    dataKey: "total",
+    fill: "#4a7c59",
+    radius: [3, 3, 0, 0]
+  })))), dash.byCategory.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: _objectSpread(_objectSpread({}, card), {}, {
+      marginBottom: 11
+    })
+  }, /*#__PURE__*/React.createElement("h3", {
+    style: {
+      margin: "0 0 9px",
+      fontSize: 12,
+      color: "#1a3528",
+      fontFamily: "sans-serif"
+    }
+  }, "By Category (all time)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 12,
+      alignItems: "center",
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement(ResponsiveContainer, {
+    width: 155,
+    height: 155
+  }, /*#__PURE__*/React.createElement(PieChart, null, /*#__PURE__*/React.createElement(Pie, {
+    data: dash.byCategory,
+    dataKey: "value",
+    cx: "50%",
+    cy: "50%",
+    outerRadius: 70,
+    innerRadius: 30
+  }, dash.byCategory.map(function (e, i) {
+    return /*#__PURE__*/React.createElement(Cell, {
+      key: i,
+      fill: e.color
+    });
+  })), /*#__PURE__*/React.createElement(Tooltip, {
+    formatter: function formatter(v) {
+      return [fmt(v)];
+    },
+    contentStyle: {
+      fontFamily: "sans-serif",
+      fontSize: 10
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      gap: 5
+    }
+  }, dash.byCategory.map(function (c, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 7,
+        fontFamily: "sans-serif",
+        fontSize: 11
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 9,
+        height: 9,
+        borderRadius: 2,
+        background: c.color,
+        flexShrink: 0
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        color: "#555"
+      }
+    }, c.name), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: "bold",
+        color: "#1a3528"
+      }
+    }, fmt(c.value)));
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: card
+  }, /*#__PURE__*/React.createElement("h3", {
+    style: {
+      margin: "0 0 9px",
+      fontSize: 12,
+      color: "#1a3528",
+      fontFamily: "sans-serif"
+    }
+  }, "History \xB7 ", dash.count, " trip", dash.count !== 1 ? "s" : ""), _toConsumableArray(sessions).reverse().slice(0, 15).map(function (s) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: s.id,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "7px 0",
+        borderBottom: "1px solid #f2ede5"
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        fontWeight: "600"
+      }
+    }, s.note), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: "sans-serif",
+        fontSize: 10,
+        color: "#aaa",
+        marginTop: 1
+      }
+    }, new Date(s.date).toLocaleDateString("en-GB", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    }), " \xB7 ", s.items.length, " items")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: "sans-serif",
+        fontWeight: "bold",
+        fontSize: 13,
+        color: "#1a3528"
+      }
+    }, fmt(s.total)));
+  })))));
 }
+ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(MarketList, null));
 
-ReactDOM.createRoot(document.getElementById("root")).render(<MarketList />);
 </script>
 </body>
 </html>

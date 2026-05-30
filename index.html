@@ -62,7 +62,6 @@ var REPO_OWNER = "DBAccount";
 var REPO_NAME = "Shoping-list-app";
 var DATA_PATH = "data/market-list-data.json";
 var CFG_LOCAL = "ml_github_token"; // localStorage key for token
-var CFG_WORKER = "ml_worker_url";  // localStorage key for worker URL
 
 // ─── CATEGORIES ──────────────────────────────────────────────────────────────
 var CATEGORIES = [{
@@ -283,22 +282,6 @@ function _ghTestToken() {
   }));
   return _ghTestToken.apply(this, arguments);
 }
-// ─── WORKER API (proxy — PAT lives server-side in Cloudflare) ─────────────────
-function workerRead(wUrl) {
-  return fetch(wUrl).then(function(r) {
-    if (r.status === 404) return { data: null, sha: null };
-    if (!r.ok) return r.json().then(function(e) { throw new Error(e.message || "Worker " + r.status); });
-    return r.json().then(function(j) { return { data: decode(j.content), sha: j.sha }; });
-  });
-}
-function workerWrite(wUrl, data, sha) {
-  var body = _objectSpread({ message: "Market List \xB7 " + new Date().toLocaleString("en-GB"), content: encode(data) }, sha ? { sha: sha } : {});
-  return fetch(wUrl, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then(function(r) {
-    if (!r.ok) return r.json().then(function(e) { throw new Error(e.message || "Worker " + r.status); });
-    return r.json().then(function(j) { return j.content.sha; });
-  });
-}
-
 var EMPTY = {
   v: 1,
   cart: {},
@@ -332,20 +315,6 @@ function MarketList() {
     _useState0 = _slicedToArray(_useState9, 2),
     testMsg = _useState0[0],
     setTestMsg = _useState0[1]; // {ok,msg}
-
-  // Worker (alternative to PAT — proxy URL stored in localStorage)
-  var _useStateWU = useState(function () { return localStorage.getItem(CFG_WORKER) || ""; }),
-    _useStateWU2 = _slicedToArray(_useStateWU, 2),
-    workerUrl = _useStateWU2[0],
-    setWorkerUrl = _useStateWU2[1];
-  var _useStateWI = useState(""),
-    _useStateWI2 = _slicedToArray(_useStateWI, 2),
-    workerInput = _useStateWI2[0],
-    setWorkerInput = _useStateWI2[1];
-  var _useStateST = useState("pat"),
-    _useStateST2 = _slicedToArray(_useStateST, 2),
-    setupTab = _useStateST2[0],
-    setSetupTab = _useStateST2[1];
 
   // Data
   var _useState1 = useState({}),
@@ -420,14 +389,14 @@ function MarketList() {
 
   // ── LOAD ────────────────────────────────────────────────────────────────────
   useEffect(function () {
-    if (!token && !workerUrl) {
+    if (!token) {
       setShowSetup(true);
       return;
     }
-    loadData(token, workerUrl);
-  }, [token, workerUrl]);
+    loadData(token);
+  }, [token]);
   var loadData = /*#__PURE__*/function () {
-    var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(tok, wUrl) {
+    var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(tok) {
       var _yield$ghRead, data, sha, d, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
@@ -436,7 +405,7 @@ function MarketList() {
             setSyncMsg("Fetching from GitHub…");
             _context.p = 1;
             _context.n = 2;
-            return wUrl ? workerRead(wUrl) : ghRead(tok);
+            return ghRead(tok);
           case 2:
             _yield$ghRead = _context.v;
             data = _yield$ghRead.data;
@@ -465,14 +434,14 @@ function MarketList() {
         }
       }, _callee, null, [[1, 3]]);
     }));
-    return function loadData(_x6, _x7) {
+    return function loadData(_x6) {
       return _ref.apply(this, arguments);
     };
   }();
 
   // ── SAVE (debounced, always uses latest ref) ─────────────────────────────
   var scheduleSave = useCallback(function (cart, customItems, sessions) {
-    if (!dataReady.current || (!token && !workerUrl)) return;
+    if (!dataReady.current || !token) return;
     latestData.current = {
       cart: cart,
       customItems: customItems,
@@ -496,7 +465,7 @@ function MarketList() {
             };
             _context2.p = 1;
             _context2.n = 2;
-            return workerUrl ? workerWrite(workerUrl, payload, ghSha) : ghWrite(token, payload, ghSha);
+            return ghWrite(token, payload, ghSha);
           case 2:
             newSha = _context2.v;
             setGhSha(newSha);
@@ -517,7 +486,7 @@ function MarketList() {
         }
       }, _callee2, null, [[1, 3]]);
     })), 1000);
-  }, [token, workerUrl, ghSha]);
+  }, [token, ghSha]);
 
   // Updaters that also trigger save
   var doSetCart = useCallback(function (fn) {
@@ -591,24 +560,6 @@ function MarketList() {
     if (!confirm("Disconnect? Your data stays in GitHub, just disconnects this browser.")) return;
     localStorage.removeItem(CFG_LOCAL);
     setToken("");
-    setShowSetup(true);
-    setCart({});
-    setCustomItems([]);
-    setSessions([]);
-    dataReady.current = false;
-  };
-  var saveWorker = function saveWorker() {
-    var w = workerInput.trim();
-    localStorage.setItem(CFG_WORKER, w);
-    setWorkerUrl(w);
-    setShowSetup(false);
-    dataReady.current = false;
-  };
-  var clearWorker = function clearWorker() {
-    if (!confirm("Disconnect worker? Your data stays in GitHub.")) return;
-    localStorage.removeItem(CFG_WORKER);
-    setWorkerUrl("");
-    setWorkerInput("");
     setShowSetup(true);
     setCart({});
     setCustomItems([]);
@@ -878,110 +829,142 @@ function MarketList() {
 
   // ── SETUP MODAL ─────────────────────────────────────────────────────────
   var SetupModal = function SetupModal() {
-    var tabBtn = function(id, label) {
-      var active = setupTab === id;
-      return /*#__PURE__*/React.createElement("button", {
-        onClick: function() { setSetupTab(id); },
-        style: {
-          flex: 1, padding: "8px 0", border: "none", borderRadius: 8,
-          background: active ? "#1a3528" : "transparent",
-          color: active ? "#f5f0e8" : "#888",
-          fontFamily: "sans-serif", fontSize: 12, fontWeight: active ? "bold" : "normal",
-          cursor: "pointer"
-        }
-      }, label);
-    };
     return /*#__PURE__*/React.createElement("div", {
-      style: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 600, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }
+      style: {
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.6)",
+        zIndex: 600,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16
+      }
     }, /*#__PURE__*/React.createElement("div", {
-      style: { background: "#fff", borderRadius: 16, padding: 24, maxWidth: 440, width: "100%", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }
-    },
-      /*#__PURE__*/React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 14 } },
-        /*#__PURE__*/React.createElement("span", { style: { fontSize: 26 } }, "☁️"),
-        /*#__PURE__*/React.createElement("div", null,
-          /*#__PURE__*/React.createElement("h2", { style: { margin: 0, fontSize: 17, color: "#1a3528" } }, "Connect to GitHub"),
-          /*#__PURE__*/React.createElement("p", { style: { margin: 0, fontSize: 11, color: "#aaa" } }, "Data saves to ", /*#__PURE__*/React.createElement("strong", null, REPO_OWNER, "/", REPO_NAME))
-        ),
-        (token || workerUrl) && /*#__PURE__*/React.createElement("button", {
-          onClick: function() { setShowSetup(false); },
-          style: { marginLeft: "auto", background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#ccc" }
-        }, "\xD7")
-      ),
-      /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 4, background: "#f2ede5", borderRadius: 10, padding: 4, marginBottom: 16 } },
-        tabBtn("worker", "☁️ Worker (no token in browser)"),
-        tabBtn("pat", "🔑 GitHub PAT")
-      ),
-      setupTab === "worker" && /*#__PURE__*/React.createElement(React.Fragment, null,
-        /*#__PURE__*/React.createElement("div", {
-          style: { background: "#f0faf4", border: "1.5px solid #c5ddc8", borderRadius: 8, padding: "10px 12px", marginBottom: 14, fontSize: 12, fontFamily: "sans-serif", color: "#2d6a4f", lineHeight: 1.6 }
-        },
-          /*#__PURE__*/React.createElement("strong", null, "One-time Cloudflare setup (free):"), /*#__PURE__*/React.createElement("br", null),
-          "1. Sign up at cloudflare.com → Workers & Pages → Create Worker", /*#__PURE__*/React.createElement("br", null),
-          "2. Paste the code from ", /*#__PURE__*/React.createElement("strong", null, "worker.js"), " in this repo", /*#__PURE__*/React.createElement("br", null),
-          "3. Settings → Variables → add secret ", /*#__PURE__*/React.createElement("strong", null, "GITHUB_PAT"), /*#__PURE__*/React.createElement("br", null),
-          "4. Copy your Worker URL and paste below"
-        ),
-        /*#__PURE__*/React.createElement("label", { style: { fontSize: 12, color: "#666", display: "block", marginBottom: 5 } }, "Worker URL"),
-        /*#__PURE__*/React.createElement("input", {
-          type: "url",
-          value: workerInput,
-          onChange: function(e) { setWorkerInput(e.target.value); },
-          placeholder: "https://your-worker.your-subdomain.workers.dev",
-          style: _objectSpread(_objectSpread({}, inp), {}, { marginBottom: 10, fontFamily: "monospace", fontSize: 12 })
-        }),
-        /*#__PURE__*/React.createElement("button", {
-          onClick: saveWorker,
-          disabled: !workerInput.trim(),
-          style: _objectSpread({}, btn("#4a7c59", { width: "100%", opacity: !workerInput.trim() ? 0.5 : 1 }))
-        }, "Connect via Worker"),
-        workerUrl && /*#__PURE__*/React.createElement("button", {
-          onClick: clearWorker,
-          style: { width: "100%", marginTop: 8, padding: "7px", background: "transparent", border: "1.5px solid #f0ddd5", borderRadius: 8, color: "#c0392b", cursor: "pointer", fontSize: 12 }
-        }, "Disconnect Worker"),
-        /*#__PURE__*/React.createElement("p", { style: { fontSize: 11, color: "#bbb", marginTop: 10, fontFamily: "sans-serif", lineHeight: 1.5 } },
-          "🔒 Your PAT stays in Cloudflare’s secure env vars — never in the browser."
-        )
-      ),
-      setupTab === "pat" && /*#__PURE__*/React.createElement(React.Fragment, null,
-        /*#__PURE__*/React.createElement("div", {
-          style: { background: "#f5f9ff", border: "1.5px solid #c8dff5", borderRadius: 8, padding: "10px 12px", marginBottom: 14, fontSize: 12, fontFamily: "sans-serif", color: "#3a6ea5", lineHeight: 1.6 }
-        },
-          /*#__PURE__*/React.createElement("strong", null, "How to get a token:"), /*#__PURE__*/React.createElement("br", null),
-          "GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens", /*#__PURE__*/React.createElement("br", null),
-          "→ Repository: ", /*#__PURE__*/React.createElement("strong", null, REPO_NAME), " → Permissions: ", /*#__PURE__*/React.createElement("strong", null, "Contents: Read & Write")
-        ),
-        /*#__PURE__*/React.createElement("label", { style: { fontSize: 12, color: "#666", display: "block", marginBottom: 5 } }, "Personal Access Token"),
-        /*#__PURE__*/React.createElement("input", {
-          type: "password",
-          value: tokenInput,
-          onChange: function(e) { setTokenInput(e.target.value); },
-          placeholder: "ghp_xxxxxxxxxxxxxxxxxxxx",
-          style: _objectSpread(_objectSpread({}, inp), {}, { marginBottom: 10, fontFamily: "monospace" })
-        }),
-        testMsg && /*#__PURE__*/React.createElement("div", {
-          style: { fontSize: 13, padding: "8px 11px", borderRadius: 8, marginBottom: 10, background: testMsg.ok ? "#f0faf4" : "#fdf0f0", color: testMsg.ok ? "#4a7c59" : "#c0392b", fontFamily: "sans-serif" }
-        }, testMsg.msg),
-        /*#__PURE__*/React.createElement("div", { style: { display: "flex", gap: 8 } },
-          /*#__PURE__*/React.createElement("button", {
-            onClick: testToken,
-            disabled: testing || !tokenInput.trim(),
-            style: _objectSpread({}, btn("#5b9ec9", { flex: 1, opacity: !tokenInput.trim() || testing ? 0.5 : 1 }))
-          }, testing ? "Testing…" : "Test Connection"),
-          /*#__PURE__*/React.createElement("button", {
-            onClick: saveToken,
-            disabled: !tokenInput.trim(),
-            style: _objectSpread({}, btn("#4a7c59", { flex: 1, opacity: !tokenInput.trim() ? 0.5 : 1 }))
-          }, "Connect")
-        ),
-        token && /*#__PURE__*/React.createElement("button", {
-          onClick: clearToken,
-          style: { width: "100%", marginTop: 10, padding: "7px", background: "transparent", border: "1.5px solid #f0ddd5", borderRadius: 8, color: "#c0392b", cursor: "pointer", fontSize: 12 }
-        }, "Disconnect This Browser"),
-        /*#__PURE__*/React.createElement("p", { style: { fontSize: 11, color: "#bbb", marginTop: 12, fontFamily: "sans-serif", lineHeight: 1.5 } },
-          "🔒 Token stored only in this browser’s localStorage and sent only to GitHub."
-        )
-      )
-    ));
+      style: {
+        background: "#fff",
+        borderRadius: 16,
+        padding: 24,
+        maxWidth: 440,
+        width: "100%",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.3)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        marginBottom: 12
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 28
+      }
+    }, "\u2601\uFE0F"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+      style: {
+        margin: 0,
+        fontSize: 18,
+        color: "#1a3528"
+      }
+    }, "Connect to GitHub"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontSize: 12,
+        color: "#aaa"
+      }
+    }, "Data saves to ", /*#__PURE__*/React.createElement("strong", null, REPO_OWNER, "/", REPO_NAME))), token && /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        return setShowSetup(false);
+      },
+      style: {
+        marginLeft: "auto",
+        background: "none",
+        border: "none",
+        fontSize: 22,
+        cursor: "pointer",
+        color: "#ccc"
+      }
+    }, "\xD7")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "#f5f9ff",
+        border: "1.5px solid #c8dff5",
+        borderRadius: 8,
+        padding: "10px 12px",
+        marginBottom: 14,
+        fontSize: 12,
+        fontFamily: "sans-serif",
+        color: "#3a6ea5",
+        lineHeight: 1.6
+      }
+    }, /*#__PURE__*/React.createElement("strong", null, "How to get a token:"), /*#__PURE__*/React.createElement("br", null), "GitHub \u2192 Settings \u2192 Developer settings \u2192 Personal access tokens \u2192 Fine-grained tokens", /*#__PURE__*/React.createElement("br", null), "\u2192 Repository: ", /*#__PURE__*/React.createElement("strong", null, REPO_NAME), " \u2192 Permissions: ", /*#__PURE__*/React.createElement("strong", null, "Contents: Read & Write")), /*#__PURE__*/React.createElement("label", {
+      style: {
+        fontSize: 12,
+        color: "#666",
+        display: "block",
+        marginBottom: 5
+      }
+    }, "Personal Access Token"), /*#__PURE__*/React.createElement("input", {
+      type: "password",
+      value: tokenInput,
+      onChange: function onChange(e) {
+        return setTokenInput(e.target.value);
+      },
+      placeholder: "ghp_xxxxxxxxxxxxxxxxxxxx",
+      style: _objectSpread(_objectSpread({}, inp), {}, {
+        marginBottom: 10,
+        fontFamily: "monospace"
+      })
+    }), testMsg && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        padding: "8px 11px",
+        borderRadius: 8,
+        marginBottom: 10,
+        background: testMsg.ok ? "#f0faf4" : "#fdf0f0",
+        color: testMsg.ok ? "#4a7c59" : "#c0392b",
+        fontFamily: "sans-serif"
+      }
+    }, testMsg.msg), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: testToken,
+      disabled: testing || !tokenInput.trim(),
+      style: _objectSpread({}, btn("#5b9ec9", {
+        flex: 1,
+        opacity: !tokenInput.trim() || testing ? 0.5 : 1
+      }))
+    }, testing ? "Testing…" : "Test Connection"), /*#__PURE__*/React.createElement("button", {
+      onClick: saveToken,
+      disabled: !tokenInput.trim(),
+      style: _objectSpread({}, btn("#4a7c59", {
+        flex: 1,
+        opacity: !tokenInput.trim() ? 0.5 : 1
+      }))
+    }, "Connect")), token && /*#__PURE__*/React.createElement("button", {
+      onClick: clearToken,
+      style: {
+        width: "100%",
+        marginTop: 10,
+        padding: "7px",
+        background: "transparent",
+        border: "1.5px solid #f0ddd5",
+        borderRadius: 8,
+        color: "#c0392b",
+        cursor: "pointer",
+        fontSize: 12
+      }
+    }, "Disconnect This Browser"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 11,
+        color: "#bbb",
+        marginTop: 12,
+        fontFamily: "sans-serif",
+        lineHeight: 1.5
+      }
+    }, "\uD83D\uDD12 Your token is stored only in this browser's localStorage and sent only to GitHub.")));
   };
 
   // ── HEADER ──────────────────────────────────────────────────────────────
@@ -1076,7 +1059,7 @@ function MarketList() {
         borderRadius: 11,
         border: "none",
         cursor: "pointer",
-        background: (!token && !workerUrl) ? "#e8623a" : "transparent",
+        background: !token ? "#e8623a" : "transparent",
         color: "#f5f0e8",
         fontSize: 13
       }

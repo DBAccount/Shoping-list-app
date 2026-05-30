@@ -24,6 +24,32 @@ A grand total of all line totals should appear in the sticky bottom bar alongsid
 the progress counter, giving a live spend estimate before reaching the checkout.
 Data stays local to the cart (not saved to GitHub until a receipt is logged).
 
+### List view — weekly shopping lists stored by month/week in GitHub
+Instead of a single flat data file, organise shopping data in GitHub by time:
+
+**Folder structure in the repo:**
+```
+data/
+  2026-05/
+    week-1.json
+    week-2.json
+    week-3.json
+    week-4.json
+  2026-06/
+    week-1.json
+    ...
+```
+
+Each file holds the cart + receipt data for that specific week.
+
+**In the List screen:**
+- A month/week navigator at the top (e.g. `< May 2026 >` → `Week 1 · Week 2 · Week 3 · Week 4`)
+- Selecting a month+week fetches that file from GitHub and loads it
+- Current week is the default on open
+- If no file exists for that week yet, start with an empty list and create the file on first save
+
+This makes it easy to look back at what was bought in any week, compare weeks, and keeps each week's data isolated.
+
 ### Smart default units per item
 Every item currently defaults to "unit" in the unit dropdown.
 Pre-map common items to sensible defaults (e.g. Whole Milk → litre, Bananas → bunch,

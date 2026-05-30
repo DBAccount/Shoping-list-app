@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🛒 Market List</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.12.0/umd/Recharts.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Georgia,serif;background:linear-gradient(160deg,#f8f5f0,#ede8df);min-height:100vh;color:#2c2c2c}
+    input,select,textarea,button{font-family:inherit}
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+    .spin{animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } = Recharts;
+
+// ─── REPO CONFIG (pre-filled — user only needs to add token) ─────────────────
+const REPO_OWNER  = "DBAccount";
+const REPO_NAME   = "Shoping-list-app";
+const DATA_PATH   = "data/market-list-data.json";
+const CFG_LOCAL   = "ml_github_token";   // localStorage key for token
+
+// ─── CATEGORIES ──────────────────────────────────────────────────────────────
+const CATEGORIES = [
+  { id:"fruits",    label:"Fruits & Veg",   emoji:"🥦", color:"#4a7c59",
+    items:["Apples","Bananas","Oranges","Mango","Grapes","Strawberries","Blueberries","Pineapple","Watermelon","Lemon","Avocado","Spinach","Kale","Broccoli","Carrots","Tomatoes","Cucumber","Bell Peppers","Onions","Garlic","Ginger","Potatoes","Sweet Potato","Courgette","Aubergine","Mushrooms","Lettuce","Celery","Beetroot","Lime","Pear","Peach"] },
+  { id:"dairy",     label:"Dairy & Eggs",   emoji:"🥛", color:"#6aafc2",
+    items:["Whole Milk","Semi-Skimmed Milk","Almond Milk","Oat Milk","Butter","Ghee","Cheddar Cheese","Mozzarella","Paneer","Greek Yogurt","Natural Yogurt","Cream","Sour Cream","Eggs (6)","Eggs (12)","Cream Cheese","Cottage Cheese","Halloumi"] },
+  { id:"bakery",    label:"Bread & Bakery", emoji:"🍞", color:"#c4883a",
+    items:["White Bread","Wholemeal Bread","Sourdough","Baguette","Pitta Bread","Naan Bread","Chapati","Bagels","Croissants","English Muffins","Tortilla Wraps","Rice Cakes","Crackers","Seeded Loaf"] },
+  { id:"pantry",    label:"Pantry",         emoji:"🫙", color:"#9b7bb5",
+    items:["Basmati Rice","Brown Rice","Pasta","Spaghetti","Noodles","Red Lentils","Green Lentils","Chickpeas","Black Beans","Kidney Beans","Rolled Oats","Quinoa","Flour","Sugar","Brown Sugar","Honey","Olive Oil","Coconut Oil","Sunflower Oil","Soy Sauce","Tomato Paste","Canned Tomatoes","Coconut Milk","Vegetable Stock","Baking Powder","Salt","Black Pepper","Turmeric","Cumin","Coriander","Chilli Powder","Garam Masala","Mustard Seeds","Cardamom","Cinnamon","Paprika"] },
+  { id:"beverages", label:"Beverages",      emoji:"☕", color:"#a0634a",
+    items:["Green Tea","Black Tea","Chai","Ground Coffee","Instant Coffee","Orange Juice","Apple Juice","Coconut Water","Sparkling Water","Still Water","Lemonade","Kombucha","Protein Shake Mix"] },
+  { id:"snacks",    label:"Snacks",         emoji:"🍫", color:"#c95f7e",
+    items:["Mixed Nuts","Almonds","Cashews","Walnuts","Peanuts","Dark Chocolate","Peanut Butter","Almond Butter","Hummus","Popcorn","Crisps","Trail Mix","Protein Bar","Dried Fruits","Dates","Granola Bar","Rice Crackers"] },
+  { id:"frozen",    label:"Frozen",         emoji:"🧊", color:"#5b9ec9",
+    items:["Frozen Peas","Frozen Spinach","Frozen Corn","Edamame","Frozen Berries","Frozen Mango","Veggie Burgers","Frozen Pizza","Ice Cream","Frozen Chips"] },
+  { id:"household", label:"Household",      emoji:"🧹", color:"#6b9e8a",
+    items:["Washing Liquid","Dishwasher Tablets","Kitchen Roll","Toilet Roll","Bin Bags","Cling Film","Foil","Zip Lock Bags","Washing Up Liquid","Multi-surface Spray","Bleach","Laundry Detergent","Fabric Softener","Sponges"] },
+  { id:"personal",  label:"Personal Care",  emoji:"🧴", color:"#d4856b",
+    items:["Shampoo","Conditioner","Body Wash","Face Wash","Moisturiser","Sunscreen","Toothpaste","Toothbrush","Floss","Deodorant","Razor","Shaving Cream","Hand Soap","Cotton Buds"] },
+];
+const ALL_CATS = [...CATEGORIES, { id:"custom", label:"Custom Items", emoji:"✏️", color:"#888" }];
+const UNITS    = ["unit","kg","g","litre","ml","pack","bunch","dozen","bag","box","tin"];
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const fmt    = n  => `£${(+n||0).toFixed(2)}`;
+const catOf  = id => ALL_CATS.find(c=>c.id===id) || {label:"Other",emoji:"🛒",color:"#888"};
+const dateLbl= iso=> new Date(iso).toLocaleDateString("en-GB",{day:"2-digit",month:"short"});
+
+// ─── GITHUB API ───────────────────────────────────────────────────────────────
+const GH = "https://api.github.com";
+const ghHeaders = token => ({ Authorization:`token ${token}`, Accept:"application/vnd.github.v3+json", "Content-Type":"application/json" });
+const encode = obj => btoa(unescape(encodeURIComponent(JSON.stringify(obj,null,2))));
+const decode = b64 => JSON.parse(decodeURIComponent(escape(atob(b64.replace(/\n/g,"")))));
+
+async function ghRead(token) {
+  const r = await fetch(`${GH}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}`, { headers:ghHeaders(token) });
+  if (r.status===404) return { data:null, sha:null };
+  if (!r.ok) { const e=await r.json(); throw new Error(e.message||`GitHub ${r.status}`); }
+  const j = await r.json();
+  return { data:decode(j.content), sha:j.sha };
+}
+
+async function ghWrite(token, data, sha) {
+  const body = {
+    message:`Market List · ${new Date().toLocaleString("en-GB")}`,
+    content: encode(data),
+    ...(sha ? {sha} : {})
+  };
+  const r = await fetch(`${GH}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}`, {
+    method:"PUT", headers:ghHeaders(token), body:JSON.stringify(body)
+  });
+  if (!r.ok) { const e=await r.json(); throw new Error(e.message||`GitHub ${r.status}`); }
+  return (await r.json()).content.sha;
+}
+
+async function ghTestToken(token) {
+  const r = await fetch(`${GH}/repos/${REPO_OWNER}/${REPO_NAME}`, { headers:ghHeaders(token) });
+  if (!r.ok) { const e=await r.json(); throw new Error(e.message); }
+  return true;
+}
+
+// ─── EMPTY DATA ───────────────────────────────────────────────────────────────
+const EMPTY = { v:1, cart:{}, customItems:[], sessions:[], lastSaved:null };
+
+// ─────────────────────────────────────────────────────────────────────────────
+function MarketList() {
+  // Auth
+  const [token,   setToken]   = useState(() => localStorage.getItem(CFG_LOCAL)||"");
+  const [tokenInput, setTokenInput] = useState("");
+  const [showSetup, setShowSetup] = useState(false);
+  const [testing,  setTesting]  = useState(false);
+  const [testMsg,  setTestMsg]  = useState(null); // {ok,msg}
+
+  // Data
+  const [cart,        setCart]        = useState({});
+  const [checked,     setChecked]     = useState({});
+  const [customItems, setCustomItems] = useState([]);
+  const [sessions,    setSessions]    = useState([]);
+  const [ghSha,       setGhSha]       = useState(null);
+
+  // UI
+  const [tab,       setTab]       = useState("browse");
+  const [activeCat, setActiveCat] = useState("fruits");
+  const [search,    setSearch]    = useState("");
+  const [customIn,  setCustomIn]  = useState("");
+
+  // Sync
+  const [syncStatus, setSyncStatus] = useState("idle"); // idle|loading|saving|saved|error
+  const [syncMsg,    setSyncMsg]    = useState("");
+  const saveTimer  = useRef(null);
+  const dataReady  = useRef(false);
+  const latestData = useRef({ cart:{}, customItems:[], sessions:[] });
+
+  // Receipt
+  const [storeName,   setStoreName]   = useState("");
+  const [receiptRows, setReceiptRows] = useState([{name:"",qty:1,price:""}]);
+
+  // ── LOAD ────────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!token) { setShowSetup(true); return; }
+    loadData(token);
+  }, [token]);
+
+  const loadData = async (tok) => {
+    setSyncStatus("loading"); setSyncMsg("Fetching from GitHub…");
+    try {
+      const { data, sha } = await ghRead(tok);
+      const d = data || EMPTY;
+      setCart(d.cart||{}); setCustomItems(d.customItems||[]); setSessions(d.sessions||[]);
+      setGhSha(sha);
+      setSyncStatus("saved"); setSyncMsg(`Loaded ✓  ${d.lastSaved ? "· Last saved "+dateLbl(d.lastSaved) : "· First use"}`);
+      setTimeout(()=>setSyncStatus("idle"),3000);
+    } catch(e) {
+      setSyncStatus("error"); setSyncMsg(`Load failed: ${e.message}`);
+    }
+    dataReady.current = true;
+  };
+
+  // ── SAVE (debounced, always uses latest ref) ─────────────────────────────
+  const scheduleSave = useCallback((cart, customItems, sessions) => {
+    if (!dataReady.current || !token) return;
+    latestData.current = { cart, customItems, sessions };
+    clearTimeout(saveTimer.current);
+    setSyncStatus("saving"); setSyncMsg("Saving to GitHub…");
+    saveTimer.current = setTimeout(async () => {
+      const { cart:c, customItems:ci, sessions:s } = latestData.current;
+      const payload = { v:1, cart:c, customItems:ci, sessions:s, lastSaved:new Date().toISOString() };
+      try {
+        const newSha = await ghWrite(token, payload, ghSha);
+        setGhSha(newSha);
+        setSyncStatus("saved"); setSyncMsg("Saved to GitHub ✓");
+        setTimeout(()=>setSyncStatus("idle"),2500);
+      } catch(e) {
+        setSyncStatus("error"); setSyncMsg(`Save failed: ${e.message}`);
+      }
+    }, 1000);
+  }, [token, ghSha]);
+
+  // Updaters that also trigger save
+  const doSetCart = useCallback(fn => {
+    setCart(prev => { const next=fn(prev); scheduleSave(next, customItems, sessions); return next; });
+  }, [customItems, sessions, scheduleSave]);
+
+  const doSetCustom = useCallback(fn => {
+    setCustomItems(prev => { const next=fn(prev); scheduleSave(cart, next, sessions); return next; });
+  }, [cart, sessions, scheduleSave]);
+
+  const doSetSessions = useCallback(fn => {
+    setSessions(prev => { const next=fn(prev); scheduleSave(cart, customItems, next); return next; });
+  }, [cart, customItems, scheduleSave]);
+
+  // ── TOKEN SETUP ─────────────────────────────────────────────────────────
+  const testToken = async () => {
+    setTesting(true); setTestMsg(null);
+    try {
+      await ghTestToken(tokenInput.trim());
+      setTestMsg({ ok:true, msg:`✓ Connected to ${REPO_OWNER}/${REPO_NAME}` });
+    } catch(e) {
+      setTestMsg({ ok:false, msg:`✗ ${e.message}` });
+    }
+    setTesting(false);
+  };
+
+  const saveToken = () => {
+    const t = tokenInput.trim();
+    localStorage.setItem(CFG_LOCAL, t);
+    setToken(t);
+    setShowSetup(false);
+    setTestMsg(null);
+    dataReady.current = false;
+  };
+
+  const clearToken = () => {
+    if (!confirm("Disconnect? Your data stays in GitHub, just disconnects this browser.")) return;
+    localStorage.removeItem(CFG_LOCAL);
+    setToken(""); setShowSetup(true);
+    setCart({}); setCustomItems([]); setSessions([]);
+    dataReady.current = false;
+  };
+
+  // ── CART ────────────────────────────────────────────────────────────────
+  const toggleItem = (catId, name) => {
+    const key = `${catId}::${name}`;
+    doSetCart(prev => {
+      const n={...prev};
+      if (n[key]) delete n[key]; else n[key]={catId,item:name,qty:1,unit:"unit"};
+      return n;
+    });
+  };
+  const setCartField = (key,field,val) => doSetCart(prev=>({...prev,[key]:{...prev[key],[field]:val}}));
+  const removeItem   = key => doSetCart(prev=>{ const n={...prev}; delete n[key]; return n; });
+  const clearCart    = () => { doSetCart(()=>({})); setChecked({}); };
+
+  // ── CUSTOM ITEMS ────────────────────────────────────────────────────────
+  const addCustom = name => {
+    const t=name.trim(); if(!t) return;
+    doSetCustom(prev => prev.find(i=>i.name.toLowerCase()===t.toLowerCase()) ? prev : [...prev,{name:t,catId:"custom"}]);
+    toggleItem("custom",t);
+    setCustomIn("");
+  };
+
+  // ── RECEIPT (manual entry) ──────────────────────────────────────────────
+  const addReceiptRow  = () => setReceiptRows(r=>[...r,{name:"",qty:1,price:""}]);
+  const removeReceiptRow = i => setReceiptRows(r=>r.filter((_,j)=>j!==i));
+  const setReceiptCell = (i,field,val) => setReceiptRows(r=>r.map((row,j)=>j===i?{...row,[field]:val}:row));
+
+  const saveReceipt = () => {
+    const validRows = receiptRows.filter(r=>r.name.trim()&&+r.price>0);
+    if (!validRows.length) return;
+    const allBuiltIn = CATEGORIES.flatMap(c=>c.items.map(i=>i.toLowerCase()));
+    const items = validRows.map(ri=>{
+      const rn=ri.name.toLowerCase();
+      const match=Object.values(cart).find(c=>c.item.toLowerCase().includes(rn.split(" ")[0])||rn.includes(c.item.toLowerCase().split(" ")[0]));
+      return {name:ri.name,catId:match?.catId||"custom",qty:+ri.qty||1,price:+ri.price};
+    });
+    // Save new items to custom list
+    const newC = items.filter(si=>!allBuiltIn.includes(si.name.toLowerCase())&&!customItems.find(ci=>ci.name.toLowerCase()===si.name.toLowerCase())).map(si=>({name:si.name,catId:"custom"}));
+    if (newC.length) doSetCustom(prev=>[...prev,...newC]);
+    const total = items.reduce((s,i)=>s+i.price*i.qty,0);
+    doSetSessions(prev=>[...prev,{id:Date.now(),date:new Date().toISOString(),note:storeName.trim()||"Shopping trip",items,total:parseFloat(total.toFixed(2))}]);
+    clearCart();
+    setStoreName(""); setReceiptRows([{name:"",qty:1,price:""}]);
+    setTab("dashboard");
+  };
+
+  // ── DASHBOARD ───────────────────────────────────────────────────────────
+  const dash = useMemo(()=>{
+    if (!sessions.length) return null;
+    const now=new Date();
+    const trips=sessions.slice(-14).map(s=>({date:dateLbl(s.date),total:s.total,note:s.note}));
+    const catMap={};
+    sessions.forEach(s=>s.items.forEach(i=>{catMap[i.catId]=(catMap[i.catId]||0)+i.price*i.qty;}));
+    const byCategory=Object.entries(catMap).map(([id,v])=>({name:catOf(id).label,value:+v.toFixed(2),color:catOf(id).color})).sort((a,b)=>b.value-a.value);
+    const mf=(m,y)=>sessions.filter(s=>{const d=new Date(s.date);return d.getMonth()===m&&d.getFullYear()===y;});
+    const lm=new Date(now.getFullYear(),now.getMonth()-1);
+    const allTime=sessions.reduce((s,x)=>s+x.total,0);
+    return { trips, byCategory,
+      thisMonth:mf(now.getMonth(),now.getFullYear()).reduce((s,x)=>s+x.total,0),
+      lastMonth:mf(lm.getMonth(),lm.getFullYear()).reduce((s,x)=>s+x.total,0),
+      allTime, avg:allTime/sessions.length, count:sessions.length
+    };
+  },[sessions]);
+
+  // ── DERIVED ─────────────────────────────────────────────────────────────
+  const cartCount    = Object.keys(cart).length;
+  const checkedCount = Object.keys(checked).filter(k=>checked[k]&&cart[k]).length;
+  const grouped      = useMemo(()=>{const g={};Object.entries(cart).forEach(([key,val])=>{(g[val.catId]=g[val.catId]||[]).push({key,...val});});return g;},[cart]);
+  const currentCat    = ALL_CATS.find(c=>c.id===activeCat);
+  const displayItems  = activeCat==="custom" ? customItems.map(i=>i.name) : (currentCat?.items||[]);
+  const filteredItems = displayItems.filter(i=>i.toLowerCase().includes(search.toLowerCase()));
+  const receiptTotal  = receiptRows.reduce((s,r)=>s+(+r.price||0)*(+r.qty||1),0);
+
+  // ── STYLE TOKENS ────────────────────────────────────────────────────────
+  const card = {background:"#fff",borderRadius:12,border:"1.5px solid #e5e0d8",padding:"14px 16px"};
+  const inp  = {padding:"8px 11px",borderRadius:8,border:"1.5px solid #d5cfc5",background:"#fff",fontSize:13,outline:"none",width:"100%"};
+  const btn  = (bg="#1a3528",extra={}) => ({padding:"9px 16px",background:bg,color:"#f5f0e8",border:"none",borderRadius:9,cursor:"pointer",fontSize:13,fontWeight:"bold",...extra});
+
+  const syncColor = {idle:"transparent",loading:"#5b9ec9",saving:"#e8a040",saved:"#4a7c59",error:"#c0392b"}[syncStatus];
+  const syncIcon  = {idle:"",loading:"⏳",saving:"⏳",saved:"☁️",error:"⚠️"}[syncStatus];
+
+  // ── SETUP MODAL ─────────────────────────────────────────────────────────
+  const SetupModal = ()=>(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:600,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div style={{background:"#fff",borderRadius:16,padding:24,maxWidth:440,width:"100%",boxShadow:"0 8px 32px rgba(0,0,0,0.3)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+          <span style={{fontSize:28}}>☁️</span>
+          <div>
+            <h2 style={{margin:0,fontSize:18,color:"#1a3528"}}>Connect to GitHub</h2>
+            <p style={{margin:0,fontSize:12,color:"#aaa"}}>Data saves to <strong>{REPO_OWNER}/{REPO_NAME}</strong></p>
+          </div>
+          {token && <button onClick={()=>setShowSetup(false)} style={{marginLeft:"auto",background:"none",border:"none",fontSize:22,cursor:"pointer",color:"#ccc"}}>×</button>}
+        </div>
+
+        <div style={{background:"#f5f9ff",border:"1.5px solid #c8dff5",borderRadius:8,padding:"10px 12px",marginBottom:14,fontSize:12,fontFamily:"sans-serif",color:"#3a6ea5",lineHeight:1.6}}>
+          <strong>How to get a token:</strong><br/>
+          GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens<br/>
+          → Repository: <strong>{REPO_NAME}</strong> → Permissions: <strong>Contents: Read & Write</strong>
+        </div>
+
+        <label style={{fontSize:12,color:"#666",display:"block",marginBottom:5}}>Personal Access Token</label>
+        <input type="password" value={tokenInput} onChange={e=>setTokenInput(e.target.value)}
+          placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+          style={{...inp,marginBottom:10,fontFamily:"monospace"}} />
+
+        {testMsg && (
+          <div style={{fontSize:13,padding:"8px 11px",borderRadius:8,marginBottom:10,
+            background:testMsg.ok?"#f0faf4":"#fdf0f0",color:testMsg.ok?"#4a7c59":"#c0392b",fontFamily:"sans-serif"}}>
+            {testMsg.msg}
+          </div>
+        )}
+
+        <div style={{display:"flex",gap:8}}>
+          <button onClick={testToken} disabled={testing||!tokenInput.trim()}
+            style={{...btn("#5b9ec9",{flex:1,opacity:!tokenInput.trim()||testing?0.5:1})}}>
+            {testing?"Testing…":"Test Connection"}
+          </button>
+          <button onClick={saveToken} disabled={!tokenInput.trim()}
+            style={{...btn("#4a7c59",{flex:1,opacity:!tokenInput.trim()?0.5:1})}}>
+            Connect
+          </button>
+        </div>
+
+        {token && (
+          <button onClick={clearToken}
+            style={{width:"100%",marginTop:10,padding:"7px",background:"transparent",border:"1.5px solid #f0ddd5",borderRadius:8,color:"#c0392b",cursor:"pointer",fontSize:12}}>
+            Disconnect This Browser
+          </button>
+        )}
+
+        <p style={{fontSize:11,color:"#bbb",marginTop:12,fontFamily:"sans-serif",lineHeight:1.5}}>
+          🔒 Your token is stored only in this browser's localStorage and sent only to GitHub.
+        </p>
+      </div>
+    </div>
+  );
+
+  // ── HEADER ──────────────────────────────────────────────────────────────
+  const Header = ()=>(
+    <div style={{background:"#1a3528",padding:"0 12px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:200,minHeight:52,boxShadow:"0 2px 14px rgba(0,0,0,0.3)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,color:"#f5f0e8",minWidth:0}}>
+        <span style={{fontSize:20,flexShrink:0}}>🛒</span>
+        <span style={{fontSize:15,fontWeight:"bold",whiteSpace:"nowrap"}}>Market List</span>
+        {syncStatus!=="idle" && (
+          <span style={{fontFamily:"sans-serif",fontSize:10,color:syncColor,whiteSpace:"nowrap",marginLeft:4}}>
+            {syncIcon} {syncMsg}
+          </span>
+        )}
+      </div>
+      <div style={{display:"flex",gap:2,alignItems:"center",flexShrink:0}}>
+        {[
+          {id:"browse",  icon:"🏪", label:"Browse"},
+          {id:"list",    icon:"📋", label:cartCount?`List(${cartCount})`:"List"},
+          {id:"receipt", icon:"🧾", label:"Receipt"},
+          {id:"dashboard",icon:"📊",label:"Stats"},
+        ].map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{
+            padding:"4px 8px",borderRadius:11,border:"none",cursor:"pointer",
+            background:tab===t.id?"#4a7c59":"transparent",
+            color:"#f5f0e8",fontSize:11,whiteSpace:"nowrap"
+          }}>{t.icon} {t.label}</button>
+        ))}
+        <button onClick={()=>setShowSetup(true)} title="GitHub Settings"
+          style={{padding:"4px 7px",borderRadius:11,border:"none",cursor:"pointer",
+            background:!token?"#e8623a":"transparent",color:"#f5f0e8",fontSize:13}}>⚙️</button>
+      </div>
+    </div>
+  );
+
+  // ────────────────────────────────────────────────────────────────────────
+  return (
+    <div style={{minHeight:"100vh"}}>
+      {showSetup && <SetupModal />}
+      <Header />
+
+      {/* ── BROWSE ── */}
+      {tab==="browse" && (
+        <div style={{display:"flex",height:"calc(100vh - 52px)"}}>
+          {/* Sidebar */}
+          <div style={{width:106,background:"#1a3528",overflowY:"auto",display:"flex",flexDirection:"column",gap:2,padding:"5px 3px",flexShrink:0}}>
+            {ALL_CATS.map(cat=>{
+              const n=Object.values(cart).filter(v=>v.catId===cat.id).length;
+              return (
+                <button key={cat.id} onClick={()=>{setActiveCat(cat.id);setSearch("");}} style={{
+                  background:activeCat===cat.id?cat.color:"rgba(255,255,255,0.04)",
+                  border:"none",borderRadius:7,padding:"6px 3px",cursor:"pointer",
+                  color:"#f5f0e8",textAlign:"center",position:"relative",
+                }}>
+                  <div style={{fontSize:17}}>{cat.emoji}</div>
+                  <div style={{fontSize:9,marginTop:2,lineHeight:1.3}}>{cat.label}</div>
+                  {n>0&&<span style={{position:"absolute",top:2,right:2,background:"#e8623a",color:"white",borderRadius:"50%",width:13,height:13,fontSize:8,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:"bold"}}>{n}</span>}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Items */}
+          <div style={{flex:1,overflowY:"auto",padding:12}}>
+            <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:8}}>
+              <span style={{fontSize:20}}>{currentCat?.emoji}</span>
+              <div>
+                <h2 style={{margin:0,fontSize:16,color:"#1a3528"}}>{currentCat?.label}</h2>
+                <p style={{margin:0,fontSize:10,color:"#aaa",fontFamily:"sans-serif"}}>Tap to add · tap again to remove</p>
+              </div>
+            </div>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search items…"
+              style={{...inp,marginBottom:8}} />
+            {activeCat==="custom"&&(
+              <div style={{display:"flex",gap:7,marginBottom:8}}>
+                <input value={customIn} onChange={e=>setCustomIn(e.target.value)}
+                  onKeyDown={e=>e.key==="Enter"&&addCustom(customIn)}
+                  placeholder="New custom item…" style={{...inp}} />
+                <button onClick={()=>addCustom(customIn)} style={{...btn(),padding:"8px 13px",whiteSpace:"nowrap"}}>Add</button>
+              </div>
+            )}
+            {filteredItems.length===0&&<p style={{color:"#bbb",fontSize:12,fontFamily:"sans-serif"}}>{search?`No items match "${search}"`:activeCat==="custom"?"No custom items yet.":""}</p>}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:7}}>
+              {filteredItems.map(name=>{
+                const key=`${activeCat}::${name}`,sel=!!cart[key],c=currentCat?.color||"#888";
+                return (
+                  <button key={name} onClick={()=>toggleItem(activeCat,name)} style={{
+                    padding:"8px 7px",borderRadius:9,border:`2px solid ${sel?c:"#e0dbd2"}`,
+                    background:sel?`${c}14`:"#fff",cursor:"pointer",textAlign:"left",
+                    fontSize:12,color:sel?c:"#444",fontWeight:sel?"600":"400",
+                    display:"flex",alignItems:"center",gap:5,transition:"all 0.12s",
+                    boxShadow:sel?`0 2px 8px ${c}20`:"0 1px 3px rgba(0,0,0,0.05)",
+                  }}>
+                    <span style={{fontSize:11,flexShrink:0}}>{sel?"✓":"+"}</span>{name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── LIST ── */}
+      {tab==="list"&&(
+        <div style={{maxWidth:580,margin:"0 auto",padding:"13px 12px",paddingBottom:82}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+            <div>
+              <h2 style={{margin:0,fontSize:18,color:"#1a3528"}}>Shopping List</h2>
+              <p style={{margin:"2px 0 0",fontSize:11,fontFamily:"sans-serif",color:"#aaa"}}>
+                {cartCount===0?"Empty — browse to add items":`${checkedCount}/${cartCount} checked off`}
+              </p>
+            </div>
+            {cartCount>0&&<button onClick={clearCart} style={{padding:"4px 10px",borderRadius:11,border:"1.5px solid #e0dbd2",background:"transparent",cursor:"pointer",fontSize:11,color:"#bbb"}}>Clear all</button>}
+          </div>
+
+          <div style={{display:"flex",gap:7,marginBottom:10,...card,padding:"7px 10px"}}>
+            <input value={customIn} onChange={e=>setCustomIn(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&addCustom(customIn)}
+              placeholder="Add custom item…"
+              style={{flex:1,border:"none",outline:"none",fontSize:12,background:"transparent"}} />
+            <button onClick={()=>addCustom(customIn)} style={{...btn(),padding:"4px 11px",fontSize:11}}>Add</button>
+          </div>
+
+          {cartCount===0?(
+            <div style={{textAlign:"center",padding:"40px 0",fontFamily:"sans-serif",color:"#ccc"}}>
+              <div style={{fontSize:38}}>🛒</div><p style={{marginTop:8}}>Your list is empty</p>
+              <button onClick={()=>setTab("browse")} style={{...btn(),marginTop:12,fontSize:12,padding:"7px 16px",borderRadius:13}}>Browse Items</button>
+            </div>
+          ):(
+            Object.entries(grouped).map(([catId,items])=>{
+              const cat=catOf(catId);
+              return (
+                <div key={catId} style={{marginBottom:14}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6,paddingBottom:4,borderBottom:`2px solid ${cat.color}`}}>
+                    <span style={{fontSize:13}}>{cat.emoji}</span>
+                    <span style={{fontWeight:"bold",color:cat.color,fontSize:12}}>{cat.label}</span>
+                    <span style={{marginLeft:"auto",fontFamily:"sans-serif",fontSize:10,color:"#bbb"}}>{items.length} item{items.length!==1?"s":""}</span>
+                  </div>
+                  {items.map(({key,item,qty,unit})=>{
+                    const chk=!!checked[key];
+                    return (
+                      <div key={key} style={{display:"flex",alignItems:"center",gap:7,...card,padding:"7px 10px",marginBottom:4,opacity:chk?0.45:1,transition:"opacity 0.2s"}}>
+                        <button onClick={()=>setChecked(p=>({...p,[key]:!p[key]}))} style={{width:18,height:18,borderRadius:4,flexShrink:0,border:`2px solid ${chk?cat.color:"#ccc"}`,background:chk?cat.color:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:10}}>{chk?"✓":""}</button>
+                        <span style={{flex:1,fontSize:12,textDecoration:chk?"line-through":"none",color:chk?"#bbb":"#2c2c2c"}}>{item}</span>
+                        <input type="number" min="1" value={qty} onChange={e=>setCartField(key,"qty",Math.max(1,parseInt(e.target.value)||1))} style={{width:34,textAlign:"center",border:"1px solid #e0dbd2",borderRadius:5,padding:"2px",fontFamily:"sans-serif",fontSize:11,background:"#faf7f2"}} />
+                        <select value={unit} onChange={e=>setCartField(key,"unit",e.target.value)} style={{border:"1px solid #e0dbd2",borderRadius:5,padding:"2px 3px",fontSize:10,background:"#faf7f2",color:"#666"}}>
+                          {UNITS.map(u=><option key={u}>{u}</option>)}
+                        </select>
+                        <button onClick={()=>removeItem(key)} style={{background:"none",border:"none",color:"#ccc",cursor:"pointer",fontSize:16,padding:1,lineHeight:1}}>×</button>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })
+          )}
+
+          {cartCount>0&&(
+            <div style={{position:"fixed",bottom:0,left:0,right:0,background:"#1a3528",padding:"8px 13px",display:"flex",alignItems:"center",gap:9,zIndex:100}}>
+              <div style={{flex:1,height:4,background:"rgba(255,255,255,0.18)",borderRadius:2}}>
+                <div style={{height:"100%",borderRadius:2,background:"#4a7c59",width:`${cartCount?(checkedCount/cartCount)*100:0}%`,transition:"width 0.3s"}} />
+              </div>
+              <span style={{color:"#f5f0e8",fontFamily:"sans-serif",fontSize:11,whiteSpace:"nowrap"}}>{checkedCount}/{cartCount}</span>
+              <button onClick={()=>setTab("receipt")} style={{...btn("#4a7c59",{padding:"5px 12px",borderRadius:11,fontSize:11,whiteSpace:"nowrap"})}}>Log Receipt →</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── RECEIPT ── */}
+      {tab==="receipt"&&(
+        <div style={{maxWidth:560,margin:"0 auto",padding:"14px 12px"}}>
+          <h2 style={{fontSize:18,color:"#1a3528",marginBottom:4}}>🧾 Log Receipt</h2>
+          <p style={{fontFamily:"sans-serif",fontSize:12,color:"#888",marginBottom:14}}>Enter items from your receipt — they'll be saved to your spending history in GitHub.</p>
+
+          <input value={storeName} onChange={e=>setStoreName(e.target.value)}
+            placeholder="Store name (e.g. Tesco, Lidl, Aldi)"
+            style={{...inp,marginBottom:12}} />
+
+          {/* Receipt rows */}
+          <div style={{...card,padding:"10px 12px",marginBottom:10}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 60px 80px 28px",gap:6,marginBottom:8}}>
+              {["Item","Qty","Price (£)",""].map((h,i)=>(
+                <span key={i} style={{fontFamily:"sans-serif",fontSize:10,color:"#aaa",fontWeight:"bold"}}>{h}</span>
+              ))}
+            </div>
+            {receiptRows.map((row,i)=>(
+              <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 60px 80px 28px",gap:6,marginBottom:6}}>
+                <input value={row.name} onChange={e=>setReceiptCell(i,"name",e.target.value)}
+                  placeholder="Item name" style={{...inp,padding:"6px 9px",fontSize:12}} />
+                <input type="number" min="1" value={row.qty} onChange={e=>setReceiptCell(i,"qty",e.target.value)}
+                  style={{...inp,padding:"6px 7px",fontSize:12,textAlign:"center"}} />
+                <input type="number" min="0" step="0.01" value={row.price} onChange={e=>setReceiptCell(i,"price",e.target.value)}
+                  placeholder="0.00" style={{...inp,padding:"6px 7px",fontSize:12,textAlign:"right"}} />
+                <button onClick={()=>removeReceiptRow(i)} style={{background:"none",border:"none",color:"#ccc",cursor:"pointer",fontSize:16,padding:2}}>{receiptRows.length>1?"×":""}</button>
+              </div>
+            ))}
+            <button onClick={addReceiptRow} style={{...btn("transparent",{color:"#4a7c59",border:"1.5px dashed #c5ddc8",borderRadius:8,width:"100%",fontSize:12,padding:"6px"})}}>+ Add row</button>
+          </div>
+
+          {receiptTotal>0&&(
+            <div style={{display:"flex",justifyContent:"space-between",...card,padding:"10px 14px",marginBottom:12,fontWeight:"bold",background:"#f5f0e8"}}>
+              <span>Total</span>
+              <span style={{fontFamily:"sans-serif",fontSize:15,color:"#1a3528"}}>{fmt(receiptTotal)}</span>
+            </div>
+          )}
+
+          <button onClick={saveReceipt}
+            disabled={!receiptRows.some(r=>r.name.trim()&&+r.price>0)}
+            style={{...btn("#4a7c59",{width:"100%",opacity:receiptRows.some(r=>r.name.trim()&&+r.price>0)?1:0.45})}}>
+            ☁️ Save to GitHub
+          </button>
+        </div>
+      )}
+
+      {/* ── DASHBOARD ── */}
+      {tab==="dashboard"&&(
+        <div style={{maxWidth:660,margin:"0 auto",padding:"14px 12px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+            <h2 style={{fontSize:18,color:"#1a3528",margin:0}}>📊 Spending Dashboard</h2>
+            <span style={{fontFamily:"sans-serif",fontSize:10,color:"#aaa"}}>☁️ {REPO_OWNER}/{REPO_NAME}</span>
+          </div>
+
+          {!dash?(
+            <div style={{textAlign:"center",padding:"44px 0",fontFamily:"sans-serif",color:"#ccc"}}>
+              <div style={{fontSize:40}}>📊</div>
+              <p style={{marginTop:8}}>No spending data yet.</p>
+              <button onClick={()=>setTab("receipt")} style={{...btn(),marginTop:12,fontSize:12,padding:"7px 16px",borderRadius:13}}>Log First Receipt</button>
+            </div>
+          ):(
+            <>
+              {/* Stat cards */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
+                {[
+                  {label:"This Month",  val:fmt(dash.thisMonth),emoji:"📅"},
+                  {label:"Last Month",  val:fmt(dash.lastMonth),emoji:"📆"},
+                  {label:"Avg Trip",    val:fmt(dash.avg),      emoji:"🧾"},
+                  {label:"All Time",    val:fmt(dash.allTime),  emoji:"🏦"},
+                ].map(s=>(
+                  <div key={s.label} style={{...card,textAlign:"center",padding:"10px 5px"}}>
+                    <div style={{fontSize:16}}>{s.emoji}</div>
+                    <div style={{fontFamily:"sans-serif",fontSize:14,fontWeight:"bold",color:"#1a3528",marginTop:3}}>{s.val}</div>
+                    <div style={{fontFamily:"sans-serif",fontSize:9,color:"#aaa",marginTop:2}}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Bar chart */}
+              {dash.trips.length>0&&(
+                <div style={{...card,marginBottom:11}}>
+                  <h3 style={{margin:"0 0 9px",fontSize:12,color:"#1a3528",fontFamily:"sans-serif"}}>Spend Per Trip</h3>
+                  <ResponsiveContainer width="100%" height={138}>
+                    <BarChart data={dash.trips} margin={{top:3,right:6,bottom:3,left:0}}>
+                      <XAxis dataKey="date" tick={{fontSize:9,fontFamily:"sans-serif"}} />
+                      <YAxis tick={{fontSize:9,fontFamily:"sans-serif"}} tickFormatter={v=>`£${v}`} width={36} />
+                      <Tooltip formatter={v=>[`£${v.toFixed(2)}`,"Spent"]} contentStyle={{fontFamily:"sans-serif",fontSize:10}} />
+                      <Bar dataKey="total" fill="#4a7c59" radius={[3,3,0,0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Pie */}
+              {dash.byCategory.length>0&&(
+                <div style={{...card,marginBottom:11}}>
+                  <h3 style={{margin:"0 0 9px",fontSize:12,color:"#1a3528",fontFamily:"sans-serif"}}>By Category (all time)</h3>
+                  <div style={{display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
+                    <ResponsiveContainer width={155} height={155}>
+                      <PieChart>
+                        <Pie data={dash.byCategory} dataKey="value" cx="50%" cy="50%" outerRadius={70} innerRadius={30}>
+                          {dash.byCategory.map((e,i)=><Cell key={i} fill={e.color}/>)}
+                        </Pie>
+                        <Tooltip formatter={v=>[fmt(v)]} contentStyle={{fontFamily:"sans-serif",fontSize:10}}/>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div style={{flex:1,display:"flex",flexDirection:"column",gap:5}}>
+                      {dash.byCategory.map((c,i)=>(
+                        <div key={i} style={{display:"flex",alignItems:"center",gap:7,fontFamily:"sans-serif",fontSize:11}}>
+                          <div style={{width:9,height:9,borderRadius:2,background:c.color,flexShrink:0}}/>
+                          <span style={{flex:1,color:"#555"}}>{c.name}</span>
+                          <span style={{fontWeight:"bold",color:"#1a3528"}}>{fmt(c.value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* History */}
+              <div style={card}>
+                <h3 style={{margin:"0 0 9px",fontSize:12,color:"#1a3528",fontFamily:"sans-serif"}}>History · {dash.count} trip{dash.count!==1?"s":""}</h3>
+                {[...sessions].reverse().slice(0,15).map(s=>(
+                  <div key={s.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:"1px solid #f2ede5"}}>
+                    <div>
+                      <div style={{fontSize:12,fontWeight:"600"}}>{s.note}</div>
+                      <div style={{fontFamily:"sans-serif",fontSize:10,color:"#aaa",marginTop:1}}>
+                        {new Date(s.date).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"})} · {s.items.length} items
+                      </div>
+                    </div>
+                    <div style={{fontFamily:"sans-serif",fontWeight:"bold",fontSize:13,color:"#1a3528"}}>{fmt(s.total)}</div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<MarketList />);
+</script>
+</body>
+</html>

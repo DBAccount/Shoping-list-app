@@ -42,9 +42,15 @@
       "item": "Courgette",
       "qty": 1,
       "unit": "unit"
+    },
+    "dairy::Whole Milk": {
+      "catId": "dairy",
+      "item": "Whole Milk",
+      "qty": 1,
+      "unit": "unit"
     }
   },
   "customItems": [],
   "sessions": [],
-  "lastSaved": "2026-05-30T14:28:33.132Z"
+  "lastSaved": "2026-05-30T14:28:38.990Z"
 }

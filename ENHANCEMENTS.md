@@ -55,6 +55,16 @@ Every item currently defaults to "unit" in the unit dropdown.
 Pre-map common items to sensible defaults (e.g. Whole Milk → litre, Bananas → bunch,
 Flour → kg, Orange Juice → litre) so the user rarely needs to change it manually.
 
+### Receipt screen — upload receipt image and auto-populate prices
+Add an "Upload Receipt" button in the Receipt (🧾) tab. When the user uploads a
+photo of a receipt, OCR is run in the browser (Tesseract.js via CDN — no server
+needed) to extract item names and prices, which auto-populate the receipt rows.
+
+- Any item on the receipt that doesn't exist in the built-in or custom item list
+  gets added to the custom items list so it appears next time in Browse
+- User can review/edit the parsed rows before saving to GitHub
+- Falls back gracefully if OCR can't read a line (leaves row blank for manual entry)
+
 ---
 
 ## In Progress

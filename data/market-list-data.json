@@ -18,9 +18,21 @@
       "item": "Onions",
       "qty": 1,
       "unit": "unit"
+    },
+    "fruits::Cucumber": {
+      "catId": "fruits",
+      "item": "Cucumber",
+      "qty": 1,
+      "unit": "unit"
+    },
+    "fruits::Tomatoes": {
+      "catId": "fruits",
+      "item": "Tomatoes",
+      "qty": 1,
+      "unit": "unit"
     }
   },
   "customItems": [],
   "sessions": [],
-  "lastSaved": "2026-05-30T14:28:23.312Z"
+  "lastSaved": "2026-05-30T14:28:25.578Z"
 }

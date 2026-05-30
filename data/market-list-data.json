@@ -6,9 +6,15 @@
       "item": "Bananas",
       "qty": 1,
       "unit": "unit"
+    },
+    "fruits::Lemon": {
+      "catId": "fruits",
+      "item": "Lemon",
+      "qty": 1,
+      "unit": "unit"
     }
   },
   "customItems": [],
   "sessions": [],
-  "lastSaved": "2026-05-30T14:28:14.404Z"
+  "lastSaved": "2026-05-30T14:28:21.527Z"
 }

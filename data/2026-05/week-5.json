@@ -35,7 +35,14 @@
       "qty": 1,
       "unit": "unit",
       "price": ""
+    },
+    "fruits::Cucumber": {
+      "catId": "fruits",
+      "item": "Cucumber",
+      "qty": 1,
+      "unit": "unit",
+      "price": ""
     }
   },
-  "lastSaved": "2026-05-31T11:31:01.953Z"
+  "lastSaved": "2026-05-31T11:31:03.686Z"
 }

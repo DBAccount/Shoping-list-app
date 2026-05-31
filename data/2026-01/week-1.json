@@ -42,7 +42,14 @@
       "qty": 1,
       "unit": "unit",
       "price": ""
+    },
+    "fruits::Ginger": {
+      "catId": "fruits",
+      "item": "Ginger",
+      "qty": 1,
+      "unit": "unit",
+      "price": ""
     }
   },
-  "lastSaved": "2026-05-31T11:17:42.939Z"
+  "lastSaved": "2026-05-31T11:17:50.596Z"
 }

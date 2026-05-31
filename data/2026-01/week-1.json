@@ -7,7 +7,14 @@
       "qty": 1,
       "unit": "bunch",
       "price": ""
+    },
+    "fruits::Lemon": {
+      "catId": "fruits",
+      "item": "Lemon",
+      "qty": 1,
+      "unit": "unit",
+      "price": ""
     }
   },
-  "lastSaved": "2026-05-31T11:17:19.047Z"
+  "lastSaved": "2026-05-31T11:17:23.646Z"
 }

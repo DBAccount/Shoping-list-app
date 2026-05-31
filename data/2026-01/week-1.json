@@ -70,7 +70,14 @@
       "qty": 1,
       "unit": "unit",
       "price": ""
+    },
+    "frozen::Edamame": {
+      "catId": "frozen",
+      "item": "Edamame",
+      "qty": 1,
+      "unit": "bag",
+      "price": ""
     }
   },
-  "lastSaved": "2026-05-31T11:26:51.236Z"
+  "lastSaved": "2026-05-31T11:27:27.173Z"
 }

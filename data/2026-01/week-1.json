@@ -1,0 +1,13 @@
+{
+  "v": 2,
+  "cart": {
+    "fruits::Bananas": {
+      "catId": "fruits",
+      "item": "Bananas",
+      "qty": 1,
+      "unit": "bunch",
+      "price": ""
+    }
+  },
+  "lastSaved": "2026-05-31T11:17:19.047Z"
+}

@@ -21,7 +21,14 @@
       "qty": 1,
       "unit": "bag",
       "price": ""
+    },
+    "fruits::Onions": {
+      "catId": "fruits",
+      "item": "Onions",
+      "qty": 1,
+      "unit": "unit",
+      "price": ""
     }
   },
-  "lastSaved": "2026-05-31T11:29:34.810Z"
+  "lastSaved": "2026-05-31T11:31:00.762Z"
 }

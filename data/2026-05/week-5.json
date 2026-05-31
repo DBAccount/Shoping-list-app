@@ -42,7 +42,14 @@
       "qty": 1,
       "unit": "unit",
       "price": ""
+    },
+    "fruits::Tomatoes": {
+      "catId": "fruits",
+      "item": "Tomatoes",
+      "qty": 1,
+      "unit": "unit",
+      "price": ""
     }
   },
-  "lastSaved": "2026-05-31T11:31:03.686Z"
+  "lastSaved": "2026-05-31T11:31:05.428Z"
 }

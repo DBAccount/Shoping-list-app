@@ -8,6 +8,7 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/prop-types@15/prop-types.min.js" crossorigin></script>
   <script src="https://unpkg.com/recharts@2.12.0/umd/Recharts.js"></script>
+  <script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Georgia,serif;background:linear-gradient(160deg,#f8f5f0,#ede8df);min-height:100vh;color:#2c2c2c}
@@ -61,6 +62,14 @@ var _Recharts = Recharts,
 var REPO_OWNER = "DBAccount";
 var REPO_NAME = "Shoping-list-app";
 var DATA_PATH = "data/market-list-data.json";
+var WEEK_PATH_FN = function WEEK_PATH_FN(year, month, week) {
+  var mm = String(month + 1).padStart(2, "0");
+  return "data/".concat(year, "-").concat(mm, "/week-").concat(week, ".json");
+};
+var currentWeekOf = function currentWeekOf(d) { return Math.ceil(d.getDate() / 7); };
+var EMPTY_GLOBAL = { v: 2, customItems: [], sessions: [], lastSaved: null };
+var EMPTY_WEEKLY = { v: 2, cart: {}, lastSaved: null };
+var MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var CFG_LOCAL = "ml_github_token"; // localStorage key for token
 
 // ─── CATEGORIES ──────────────────────────────────────────────────────────────
@@ -126,6 +135,29 @@ var ALL_CATS = [].concat(CATEGORIES, [{
   color: "#888"
 }]);
 var UNITS = ["unit", "kg", "g", "litre", "ml", "pack", "bunch", "dozen", "bag", "box", "tin"];
+var DEFAULT_UNITS = {
+  "Whole Milk": "litre", "Semi-Skimmed Milk": "litre", "Almond Milk": "litre",
+  "Oat Milk": "litre", "Cream": "litre", "Coconut Milk": "litre",
+  "Orange Juice": "litre", "Apple Juice": "litre", "Coconut Water": "litre",
+  "Sparkling Water": "litre", "Still Water": "litre", "Lemonade": "litre",
+  "Kombucha": "litre", "Ground Coffee": "g", "Instant Coffee": "g",
+  "Bananas": "bunch", "Grapes": "bunch", "Celery": "bunch",
+  "Flour": "kg", "Basmati Rice": "kg", "Brown Rice": "kg",
+  "Rolled Oats": "kg", "Sugar": "kg", "Brown Sugar": "kg",
+  "Red Lentils": "kg", "Green Lentils": "kg", "Quinoa": "kg",
+  "Pasta": "kg", "Spaghetti": "kg",
+  "Frozen Peas": "bag", "Frozen Spinach": "bag", "Frozen Corn": "bag",
+  "Edamame": "bag", "Frozen Berries": "bag", "Frozen Mango": "bag", "Frozen Chips": "bag",
+  "Mixed Nuts": "bag", "Almonds": "bag", "Cashews": "bag",
+  "Walnuts": "bag", "Peanuts": "bag", "Dried Fruits": "bag", "Trail Mix": "bag",
+  "Eggs (6)": "dozen", "Eggs (12)": "dozen",
+  "Washing Liquid": "litre", "Dishwasher Tablets": "pack",
+  "Bin Bags": "pack", "Laundry Detergent": "pack",
+  "Toilet Roll": "pack", "Kitchen Roll": "pack",
+  "Zip Lock Bags": "pack", "Sponges": "pack", "Cotton Buds": "pack",
+  "Cling Film": "pack", "Foil": "pack",
+  "Protein Shake Mix": "kg", "Granola Bar": "pack", "Protein Bar": "pack"
+};
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 var fmt = function fmt(n) {
@@ -282,6 +314,24 @@ function _ghTestToken() {
   }));
   return _ghTestToken.apply(this, arguments);
 }
+function ghReadPath(token, path) {
+  return fetch("".concat(GH, "/repos/").concat(REPO_OWNER, "/").concat(REPO_NAME, "/contents/").concat(path), {
+    headers: ghHeaders(token)
+  }).then(function (r) {
+    if (r.status === 404) return { data: null, sha: null };
+    if (!r.ok) return r.json().then(function (e) { throw new Error(e.message || "GitHub " + r.status); });
+    return r.json().then(function (j) { return { data: decode(j.content), sha: j.sha }; });
+  });
+}
+function ghWritePath(token, path, data, sha) {
+  var body = _objectSpread({ message: "Market List · ".concat(new Date().toLocaleString("en-GB")), content: encode(data) }, sha ? { sha: sha } : {});
+  return fetch("".concat(GH, "/repos/").concat(REPO_OWNER, "/").concat(REPO_NAME, "/contents/").concat(path), {
+    method: "PUT", headers: ghHeaders(token), body: JSON.stringify(body)
+  }).then(function (r) {
+    if (!r.ok) return r.json().then(function (e) { throw new Error(e.message || "GitHub " + r.status); });
+    return r.json().then(function (j) { return j.content.sha; });
+  });
+}
 var EMPTY = {
   v: 1,
   cart: {},
@@ -337,6 +387,27 @@ function MarketList() {
     _useState18 = _slicedToArray(_useState17, 2),
     ghSha = _useState18[0],
     setGhSha = _useState18[1];
+  var _useStateGG = useState(null),
+    _useStateGG2 = _slicedToArray(_useStateGG, 2),
+    ghShaGlobal = _useStateGG2[0],
+    setGhShaGlobal = _useStateGG2[1];
+  var _useStateWW = useState(null),
+    _useStateWW2 = _slicedToArray(_useStateWW, 2),
+    ghShaWeekly = _useStateWW2[0],
+    setGhShaWeekly = _useStateWW2[1];
+  var _nowD = new Date();
+  var _useStateNY = useState(_nowD.getFullYear()),
+    _useStateNY2 = _slicedToArray(_useStateNY, 2),
+    navYear = _useStateNY2[0],
+    setNavYear = _useStateNY2[1];
+  var _useStateNM = useState(_nowD.getMonth()),
+    _useStateNM2 = _slicedToArray(_useStateNM, 2),
+    navMonth = _useStateNM2[0],
+    setNavMonth = _useStateNM2[1];
+  var _useStateNW = useState(currentWeekOf(_nowD)),
+    _useStateNW2 = _slicedToArray(_useStateNW, 2),
+    navWeek = _useStateNW2[0],
+    setNavWeek = _useStateNW2[1];
 
   // UI
   var _useState19 = useState("browse"),
@@ -372,6 +443,7 @@ function MarketList() {
     customItems: [],
     sessions: []
   });
+  var latestSha = useRef({ global: null, weekly: null });
 
   // Receipt
   var _useState31 = useState(""),
@@ -386,6 +458,15 @@ function MarketList() {
     _useState34 = _slicedToArray(_useState33, 2),
     receiptRows = _useState34[0],
     setReceiptRows = _useState34[1];
+  var _useState_ocr = useState(false),
+    _useState_ocr2 = _slicedToArray(_useState_ocr, 2),
+    ocrLoading = _useState_ocr2[0],
+    setOcrLoading = _useState_ocr2[1];
+  var _useState_ocrMsg = useState(""),
+    _useState_ocrMsg2 = _slicedToArray(_useState_ocrMsg, 2),
+    ocrMsg = _useState_ocrMsg2[0],
+    setOcrMsg = _useState_ocrMsg2[1];
+  var receiptFileRef = useRef(null);
 
   // ── LOAD ────────────────────────────────────────────────────────────────────
   useEffect(function () {
@@ -395,118 +476,99 @@ function MarketList() {
     }
     loadData(token);
   }, [token]);
-  var loadData = /*#__PURE__*/function () {
-    var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(tok) {
-      var _yield$ghRead, data, sha, d, _t;
-      return _regenerator().w(function (_context) {
-        while (1) switch (_context.p = _context.n) {
-          case 0:
-            setSyncStatus("loading");
-            setSyncMsg("Fetching from GitHub…");
-            _context.p = 1;
-            _context.n = 2;
-            return ghRead(tok);
-          case 2:
-            _yield$ghRead = _context.v;
-            data = _yield$ghRead.data;
-            sha = _yield$ghRead.sha;
-            d = data || EMPTY;
-            setCart(d.cart || {});
-            setCustomItems(d.customItems || []);
-            setSessions(d.sessions || []);
-            setGhSha(sha);
-            setSyncStatus("saved");
-            setSyncMsg("Loaded \u2713  ".concat(d.lastSaved ? "· Last saved " + dateLbl(d.lastSaved) : "· First use"));
-            setTimeout(function () {
-              return setSyncStatus("idle");
-            }, 3000);
-            _context.n = 4;
-            break;
-          case 3:
-            _context.p = 3;
-            _t = _context.v;
-            setSyncStatus("error");
-            setSyncMsg("Load failed: ".concat(_t.message));
-          case 4:
-            dataReady.current = true;
-          case 5:
-            return _context.a(2);
-        }
-      }, _callee, null, [[1, 3]]);
-    }));
-    return function loadData(_x6) {
-      return _ref.apply(this, arguments);
-    };
-  }();
+  useEffect(function () {
+    latestSha.current = { global: ghShaGlobal, weekly: ghShaWeekly };
+  }, [ghShaGlobal, ghShaWeekly]);
+  var loadData = function loadData(tok, year, month, week) {
+    var y = year !== undefined ? year : navYear;
+    var m = month !== undefined ? month : navMonth;
+    var w = week !== undefined ? week : navWeek;
+    setSyncStatus("loading");
+    setSyncMsg("Fetching from GitHub…");
+    var weekPath = WEEK_PATH_FN(y, m, w);
+    Promise.all([ghReadPath(tok, DATA_PATH), ghReadPath(tok, weekPath)]).then(function (results) {
+      var gResult = results[0];
+      var wResult = results[1];
+      var gData = gResult.data;
+      var wData = wResult.data;
+      var migratedCart = null;
+      if (gData && gData.v === 1 && gData.cart) {
+        migratedCart = gData.cart;
+        gData = { v: 2, customItems: gData.customItems || [], sessions: gData.sessions || [], lastSaved: gData.lastSaved };
+      }
+      var g = gData || EMPTY_GLOBAL;
+      var cartToLoad = wData ? (wData.cart || {}) : (migratedCart || {});
+      setCart(cartToLoad);
+      setCustomItems(g.customItems || []);
+      setSessions(g.sessions || []);
+      setGhShaGlobal(gResult.sha);
+      setGhShaWeekly(wResult.sha);
+      setSyncStatus("saved");
+      setSyncMsg("Loaded ✓  " + (g.lastSaved ? "· Last saved " + dateLbl(g.lastSaved) : "· First use"));
+      setTimeout(function () { return setSyncStatus("idle"); }, 3000);
+      dataReady.current = true;
+    }).catch(function (err) {
+      setSyncStatus("error");
+      setSyncMsg("Load failed: " + err.message);
+      dataReady.current = true;
+    });
+  };
 
   // ── SAVE (debounced, always uses latest ref) ─────────────────────────────
-  var scheduleSave = useCallback(function (cart, customItems, sessions) {
+  var scheduleSave = useCallback(function (newCart, newCustomItems, newSessions, opts) {
     if (!dataReady.current || !token) return;
-    latestData.current = {
-      cart: cart,
-      customItems: customItems,
-      sessions: sessions
-    };
+    var gc = opts ? opts.globalChanged : true;
+    var wc = opts ? opts.weeklyChanged : true;
+    latestData.current = { cart: newCart, customItems: newCustomItems, sessions: newSessions };
     clearTimeout(saveTimer.current);
     setSyncStatus("saving");
     setSyncMsg("Saving to GitHub…");
-    saveTimer.current = setTimeout(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-      var _latestData$current, c, ci, s, payload, newSha, _t2;
-      return _regenerator().w(function (_context2) {
-        while (1) switch (_context2.p = _context2.n) {
-          case 0:
-            _latestData$current = latestData.current, c = _latestData$current.cart, ci = _latestData$current.customItems, s = _latestData$current.sessions;
-            payload = {
-              v: 1,
-              cart: c,
-              customItems: ci,
-              sessions: s,
-              lastSaved: new Date().toISOString()
-            };
-            _context2.p = 1;
-            _context2.n = 2;
-            return ghWrite(token, payload, ghSha);
-          case 2:
-            newSha = _context2.v;
-            setGhSha(newSha);
-            setSyncStatus("saved");
-            setSyncMsg("Saved to GitHub ✓");
-            setTimeout(function () {
-              return setSyncStatus("idle");
-            }, 2500);
-            _context2.n = 4;
-            break;
-          case 3:
-            _context2.p = 3;
-            _t2 = _context2.v;
-            setSyncStatus("error");
-            setSyncMsg("Save failed: ".concat(_t2.message));
-          case 4:
-            return _context2.a(2);
-        }
-      }, _callee2, null, [[1, 3]]);
-    })), 1000);
-  }, [token, ghSha]);
+    var capturedNavYear = navYear;
+    var capturedNavMonth = navMonth;
+    var capturedNavWeek = navWeek;
+    saveTimer.current = setTimeout(function () {
+      var _d = latestData.current;
+      var _sha = latestSha.current;
+      var saves = [];
+      if (gc) {
+        var gPayload = { v: 2, customItems: _d.customItems, sessions: _d.sessions, lastSaved: new Date().toISOString() };
+        saves.push(ghWritePath(token, DATA_PATH, gPayload, _sha.global).then(function (s) { setGhShaGlobal(s); latestSha.current.global = s; }));
+      }
+      if (wc) {
+        var wPayload = { v: 2, cart: _d.cart, lastSaved: new Date().toISOString() };
+        var wPath = WEEK_PATH_FN(capturedNavYear, capturedNavMonth, capturedNavWeek);
+        saves.push(ghWritePath(token, wPath, wPayload, _sha.weekly).then(function (s) { setGhShaWeekly(s); latestSha.current.weekly = s; }));
+      }
+      Promise.all(saves).then(function () {
+        setSyncStatus("saved");
+        setSyncMsg("Saved to GitHub ✓");
+        setTimeout(function () { return setSyncStatus("idle"); }, 2500);
+      }).catch(function (err) {
+        setSyncStatus("error");
+        setSyncMsg("Save failed: " + err.message);
+      });
+    }, 1000);
+  }, [token, navYear, navMonth, navWeek]);
 
   // Updaters that also trigger save
   var doSetCart = useCallback(function (fn) {
     setCart(function (prev) {
       var next = fn(prev);
-      scheduleSave(next, customItems, sessions);
+      scheduleSave(next, customItems, sessions, { globalChanged: false, weeklyChanged: true });
       return next;
     });
   }, [customItems, sessions, scheduleSave]);
   var doSetCustom = useCallback(function (fn) {
     setCustomItems(function (prev) {
       var next = fn(prev);
-      scheduleSave(cart, next, sessions);
+      scheduleSave(cart, next, sessions, { globalChanged: true, weeklyChanged: false });
       return next;
     });
   }, [cart, sessions, scheduleSave]);
   var doSetSessions = useCallback(function (fn) {
     setSessions(function (prev) {
       var next = fn(prev);
-      scheduleSave(cart, customItems, next);
+      scheduleSave(cart, customItems, next, { globalChanged: true, weeklyChanged: false });
       return next;
     });
   }, [cart, customItems, scheduleSave]);
@@ -566,18 +628,28 @@ function MarketList() {
     setSessions([]);
     dataReady.current = false;
   };
+  var navPrevMonth = function navPrevMonth() {
+    var m = navMonth - 1, y = navYear;
+    if (m < 0) { m = 11; y = y - 1; }
+    setNavMonth(m); setNavYear(y); setNavWeek(1);
+    setCart({}); loadData(token, y, m, 1);
+  };
+  var navNextMonth = function navNextMonth() {
+    var m = navMonth + 1, y = navYear;
+    if (m > 11) { m = 0; y = y + 1; }
+    setNavMonth(m); setNavYear(y); setNavWeek(1);
+    setCart({}); loadData(token, y, m, 1);
+  };
+  var navSelectWeek = function navSelectWeek(w) {
+    setNavWeek(w); setCart({}); loadData(token, navYear, navMonth, w);
+  };
 
   // ── CART ────────────────────────────────────────────────────────────────
   var toggleItem = function toggleItem(catId, name) {
     var key = "".concat(catId, "::").concat(name);
     doSetCart(function (prev) {
       var n = _objectSpread({}, prev);
-      if (n[key]) delete n[key];else n[key] = {
-        catId: catId,
-        item: name,
-        qty: 1,
-        unit: "unit"
-      };
+      if (n[key]) delete n[key];else n[key] = { catId: catId, item: name, qty: 1, unit: DEFAULT_UNITS[name] || "unit", price: "" };
       return n;
     });
   };
@@ -698,6 +770,60 @@ function MarketList() {
     setTab("dashboard");
   };
 
+  var SKIP_LINES = /total|subtotal|vat|tax|change|cash|card|saving|receipt|thank|tel:|www\.|date:|time:/i;
+  var parseOcrText = function parseOcrText(text) {
+    var lines = text.split(/\r?\n/);
+    var parsed = [];
+    lines.forEach(function (line) {
+      var trimmed = line.trim();
+      if (!trimmed || SKIP_LINES.test(trimmed)) return;
+      var m = trimmed.match(/^(.+?)\s+\xA3?([\d]+\.[\d]{2})\s*$/);
+      if (!m) return;
+      var name = m[1].trim().replace(/\s{2,}/g, " ");
+      var price = parseFloat(m[2]);
+      if (/^\d+$/.test(name) || name.length < 2 || price <= 0 || price > 500) return;
+      var titleName = name.split(" ").map(function (w) {
+        return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+      }).join(" ");
+      parsed.push({ name: titleName, qty: 1, price: price.toFixed(2) });
+    });
+    return parsed;
+  };
+  var handleReceiptFile = function handleReceiptFile(file) {
+    if (!file) return;
+    setOcrLoading(true);
+    setOcrMsg("Reading receipt…");
+    Tesseract.recognize(file, "eng", {
+      logger: function logger(m) {
+        if (m.status === "recognizing text") {
+          setOcrMsg("Reading… " + Math.round(m.progress * 100) + "%");
+        }
+      }
+    }).then(function (result) {
+      var parsed = parseOcrText(result.data.text);
+      if (parsed.length > 0) {
+        setReceiptRows(parsed);
+        setOcrMsg("Found " + parsed.length + " item" + (parsed.length !== 1 ? "s" : "") + ". Review below.");
+      } else {
+        setOcrMsg("Couldn't read any items. Please enter manually.");
+      }
+      var allBuiltIn = CATEGORIES.flatMap(function (c) {
+        return c.items.map(function (i) { return i.toLowerCase(); });
+      });
+      var newCustom = parsed.filter(function (row) {
+        return !allBuiltIn.includes(row.name.toLowerCase()) &&
+          !customItems.find(function (ci) { return ci.name.toLowerCase() === row.name.toLowerCase(); });
+      }).map(function (row) { return { name: row.name, catId: "custom" }; });
+      if (newCustom.length) {
+        doSetCustom(function (prev) { return _toConsumableArray(prev).concat(newCustom); });
+      }
+      setOcrLoading(false);
+    }).catch(function (err) {
+      setOcrMsg("OCR failed: " + err.message);
+      setOcrLoading(false);
+    });
+  };
+
   // ── DASHBOARD ───────────────────────────────────────────────────────────
   var dash = useMemo(function () {
     if (!sessions.length) return null;
@@ -753,6 +879,22 @@ function MarketList() {
   }, [sessions]);
 
   // ── DERIVED ─────────────────────────────────────────────────────────────
+  var itemFreqMap = useMemo(function () {
+    var freq = {};
+    sessions.forEach(function (s) {
+      s.items.forEach(function (it) {
+        freq[it.name] = (freq[it.name] || 0) + 1;
+      });
+    });
+    return freq;
+  }, [sessions]);
+
+  var cartGrandTotal = useMemo(function () {
+    return Object.values(cart).reduce(function (sum, it) {
+      return sum + (parseFloat(it.price) || 0) * (it.qty || 1);
+    }, 0);
+  }, [cart]);
+
   var cartCount = Object.keys(cart).length;
   var checkedCount = Object.keys(checked).filter(function (k) {
     return checked[k] && cart[k];
@@ -777,6 +919,8 @@ function MarketList() {
   }) : (currentCat === null || currentCat === void 0 ? void 0 : currentCat.items) || [];
   var filteredItems = displayItems.filter(function (i) {
     return i.toLowerCase().includes(search.toLowerCase());
+  }).slice().sort(function (a, b) {
+    return (itemFreqMap[b] || 0) - (itemFreqMap[a] || 0);
   });
   var receiptTotal = receiptRows.reduce(function (s, r) {
     return s + (+r.price || 0) * (+r.qty || 1);
@@ -1279,6 +1423,36 @@ function MarketList() {
       color: "#bbb"
     }
   }, "Clear all")), /*#__PURE__*/React.createElement("div", {
+    style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }
+  },
+    /*#__PURE__*/React.createElement("button", {
+      onClick: navPrevMonth,
+      style: { background: "none", border: "1px solid #ddd", borderRadius: 6, cursor: "pointer", padding: "2px 8px", fontSize: 13 }
+    }, "<"),
+    /*#__PURE__*/React.createElement("span", {
+      style: { fontFamily: "sans-serif", fontSize: 13, fontWeight: "bold", flex: 1, textAlign: "center" }
+    }, MONTH_NAMES[navMonth] + " " + navYear),
+    /*#__PURE__*/React.createElement("button", {
+      onClick: navNextMonth,
+      style: { background: "none", border: "1px solid #ddd", borderRadius: 6, cursor: "pointer", padding: "2px 8px", fontSize: 13 }
+    }, ">")
+  ), /*#__PURE__*/React.createElement("div", {
+    style: { display: "flex", gap: 5, marginBottom: 12 }
+  },
+    [1, 2, 3, 4, 5].map(function (w) {
+      return /*#__PURE__*/React.createElement("button", {
+        key: w,
+        onClick: function onClick() { return navSelectWeek(w); },
+        style: {
+          flex: 1, padding: "4px 0", borderRadius: 7,
+          border: "1.5px solid " + (navWeek === w ? "#4a7c59" : "#e0dbd2"),
+          background: navWeek === w ? "#4a7c59" : "transparent",
+          color: navWeek === w ? "#fff" : "#888",
+          cursor: "pointer", fontFamily: "sans-serif", fontSize: 11
+        }
+      }, "W" + w);
+    })
+  ), /*#__PURE__*/React.createElement("div", {
     style: _objectSpread(_objectSpread({
       display: "flex",
       gap: 7,
@@ -1375,7 +1549,8 @@ function MarketList() {
       var key = _ref0.key,
         item = _ref0.item,
         qty = _ref0.qty,
-        unit = _ref0.unit;
+        unit = _ref0.unit,
+        price = _ref0.price;
       var chk = !!checked[key];
       return /*#__PURE__*/React.createElement("div", {
         key: key,
@@ -1450,7 +1625,33 @@ function MarketList() {
         return /*#__PURE__*/React.createElement("option", {
           key: u
         }, u);
-      })), /*#__PURE__*/React.createElement("button", {
+      }), /*#__PURE__*/React.createElement("input", {
+        type: "number",
+        min: "0",
+        step: "0.01",
+        value: price || "",
+        onChange: function onChange(e) { return setCartField(key, "price", e.target.value); },
+        placeholder: "\xA3",
+        style: {
+          width: 52,
+          textAlign: "right",
+          border: "1px solid #e0dbd2",
+          borderRadius: 5,
+          padding: "2px 4px",
+          fontFamily: "sans-serif",
+          fontSize: 11,
+          background: "#faf7f2"
+        }
+      }), parseFloat(price) > 0 && /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontFamily: "sans-serif",
+          fontSize: 11,
+          color: "#1a3528",
+          whiteSpace: "nowrap",
+          minWidth: 44,
+          textAlign: "right"
+        }
+      }, fmt((parseFloat(price) || 0) * qty)), /*#__PURE__*/React.createElement("button", {
         onClick: function onClick() {
           return removeItem(key);
         },
@@ -1500,7 +1701,15 @@ function MarketList() {
       fontSize: 11,
       whiteSpace: "nowrap"
     }
-  }, checkedCount, "/", cartCount), /*#__PURE__*/React.createElement("button", {
+  }, checkedCount, "/", cartCount), cartGrandTotal > 0 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#f5f0e8",
+      fontFamily: "sans-serif",
+      fontSize: 12,
+      fontWeight: "bold",
+      whiteSpace: "nowrap"
+    }
+  }, fmt(cartGrandTotal)), /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
       return setTab("receipt");
     },
@@ -1538,7 +1747,27 @@ function MarketList() {
     style: _objectSpread(_objectSpread({}, inp), {}, {
       marginBottom: 12
     })
-  }), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", { style: { marginBottom: 12 } },
+    /*#__PURE__*/React.createElement("input", {
+      ref: receiptFileRef,
+      type: "file",
+      accept: "image/*",
+      style: { display: "none" },
+      onChange: function onChange(e) {
+        var f = e.target.files && e.target.files[0];
+        if (f) handleReceiptFile(f);
+        e.target.value = "";
+      }
+    }),
+    /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() { return receiptFileRef.current && receiptFileRef.current.click(); },
+      disabled: ocrLoading,
+      style: _objectSpread(_objectSpread({}, btn("#5b9ec9", { width: "100%", opacity: ocrLoading ? 0.6 : 1 })), {})
+    }, ocrLoading ? ocrMsg : "\uD83D\uDCF8 Upload Receipt Photo (auto-fill)"),
+    !ocrLoading && ocrMsg && /*#__PURE__*/React.createElement("p", {
+      style: { fontFamily: "sans-serif", fontSize: 11, color: "#4a7c59", marginTop: 5 }
+    }, ocrMsg)
+  ), /*#__PURE__*/React.createElement("div", {
     style: _objectSpread(_objectSpread({}, card), {}, {
       padding: "10px 12px",
       marginBottom: 10

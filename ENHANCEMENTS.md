@@ -6,64 +6,7 @@ A scratchpad for features and improvements. Add ideas freely; move to **Done** w
 
 ## Ideas
 
-### Browse screen — sort items by past order frequency
-In the Browse (🏪) tab, items within each category should be sorted by how many
-times they have appeared in past shopping sessions. The `sessions` array already
-stored in GitHub (`data/market-list-data.json`) contains every receipt, so the
-frequency can be derived at load time without any extra storage.
-
-Most-ordered items float to the top of each category grid; items never ordered
-before stay at the bottom. Makes the browse screen feel personalised over time.
-
-### List view — price per item + line total column
-Add two new columns to each row in the list view (📋 tab):
-- **Unit price** — editable price field the user fills in while shopping
-- **Line total** — auto-calculated as `unit price × qty`, shown read-only next to it
-
-A grand total of all line totals should appear in the sticky bottom bar alongside
-the progress counter, giving a live spend estimate before reaching the checkout.
-Data stays local to the cart (not saved to GitHub until a receipt is logged).
-
-### List view — weekly shopping lists stored by month/week in GitHub
-Instead of a single flat data file, organise shopping data in GitHub by time:
-
-**Folder structure in the repo:**
-```
-data/
-  2026-05/
-    week-1.json
-    week-2.json
-    week-3.json
-    week-4.json
-  2026-06/
-    week-1.json
-    ...
-```
-
-Each file holds the cart + receipt data for that specific week.
-
-**In the List screen:**
-- A month/week navigator at the top (e.g. `< May 2026 >` → `Week 1 · Week 2 · Week 3 · Week 4`)
-- Selecting a month+week fetches that file from GitHub and loads it
-- Current week is the default on open
-- If no file exists for that week yet, start with an empty list and create the file on first save
-
-This makes it easy to look back at what was bought in any week, compare weeks, and keeps each week's data isolated.
-
-### Smart default units per item
-Every item currently defaults to "unit" in the unit dropdown.
-Pre-map common items to sensible defaults (e.g. Whole Milk → litre, Bananas → bunch,
-Flour → kg, Orange Juice → litre) so the user rarely needs to change it manually.
-
-### Receipt screen — upload receipt image and auto-populate prices
-Add an "Upload Receipt" button in the Receipt (🧾) tab. When the user uploads a
-photo of a receipt, OCR is run in the browser (Tesseract.js via CDN — no server
-needed) to extract item names and prices, which auto-populate the receipt rows.
-
-- Any item on the receipt that doesn't exist in the built-in or custom item list
-  gets added to the custom items list so it appears next time in Browse
-- User can review/edit the parsed rows before saving to GitHub
-- Falls back gracefully if OCR can't read a line (leaves row blank for manual entry)
+<!-- All current ideas have been implemented -->
 
 ---
 
@@ -78,3 +21,8 @@ needed) to extract item names and prices, which auto-populate the receipt rows.
 - [x] Fix blank page (duplicate `const` declarations blocking React mount)
 - [x] Add `prop-types` CDN so Recharts initialises correctly
 - [x] App live on GitHub Pages at https://dbaccount.github.io/Shoping-list-app/
+- [x] **F1 — Browse sort by frequency**: Items in each Browse category now float to the top based on how many times they have appeared in past shopping sessions. `itemFreqMap` computed from `sessions` at render time.
+- [x] **F2 — Price per item + line total + grand total**: Each list row has an editable price field and an auto-calculated line total (`price × qty`). A running grand total appears in the sticky bottom bar.
+- [x] **F3 — Weekly data structure**: GitHub data is now organised by `data/YYYY-MM/week-N.json`. The List tab has a `< Month >` navigator and W1–W5 week selector. Cart changes write only to the weekly file; custom items and sessions write only to the global file. Old v1 data is migrated on first load.
+- [x] **F4 — Smart default units**: Common items default to sensible units (e.g. Whole Milk → litre, Bananas → bunch, Flour → kg) instead of always defaulting to "unit".
+- [x] **F5 — Receipt OCR upload**: A "Upload Receipt Photo" button in the Receipt tab uses Tesseract.js (CDN, no server) to OCR a receipt image and auto-populate the receipt rows. New items are added to the custom items list. User can review/edit before saving.

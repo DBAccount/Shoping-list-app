@@ -492,12 +492,20 @@ function MarketList() {
       var gData = gResult.data;
       var wData = wResult.data;
       var migratedCart = null;
+      var isInitialLoad = year === undefined;
       if (gData && gData.v === 1 && gData.cart) {
-        migratedCart = gData.cart;
+        migratedCart = isInitialLoad ? gData.cart : null;
         gData = { v: 2, customItems: gData.customItems || [], sessions: gData.sessions || [], lastSaved: gData.lastSaved };
+        // Immediately write global as v2 so migration never repeats
+        if (isInitialLoad) {
+          ghWritePath(tok, DATA_PATH, gData, gResult.sha).then(function(s) {
+            setGhShaGlobal(s);
+            latestSha.current.global = s;
+          }).catch(function() {});
+        }
       }
       var g = gData || EMPTY_GLOBAL;
-      var cartToLoad = wData ? (wData.cart || {}) : (migratedCart || {});
+      var cartToLoad = wData ? (wData.cart || {}) : (isInitialLoad && migratedCart ? migratedCart : {});
       setCart(cartToLoad);
       setCustomItems(g.customItems || []);
       setSessions(g.sessions || []);

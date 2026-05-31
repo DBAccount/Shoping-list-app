@@ -7,7 +7,14 @@
       "qty": 1,
       "unit": "unit",
       "price": ""
+    },
+    "pantry::Canned Tomatoes": {
+      "catId": "pantry",
+      "item": "Canned Tomatoes",
+      "qty": 1,
+      "unit": "unit",
+      "price": ""
     }
   },
-  "lastSaved": "2026-05-31T11:29:30.735Z"
+  "lastSaved": "2026-05-31T11:29:32.736Z"
 }

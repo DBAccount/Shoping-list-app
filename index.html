@@ -797,6 +797,19 @@ function MarketList() {
     });
     return parsed;
   };
+  var parseReceiptDate = function parseReceiptDate(text) {
+    var m1 = text.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})\b/);
+    if (m1) { var d1 = new Date(parseInt(m1[3]), parseInt(m1[2]) - 1, parseInt(m1[1])); if (!isNaN(d1)) return d1; }
+    var m2 = text.match(/\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(\d{4})\b/i);
+    if (m2) {
+      var months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+      var d2 = new Date(parseInt(m2[3]), months[m2[2].toLowerCase().slice(0,3)], parseInt(m2[1]));
+      if (!isNaN(d2)) return d2;
+    }
+    var m3 = text.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
+    if (m3) { var d3 = new Date(parseInt(m3[1]), parseInt(m3[2]) - 1, parseInt(m3[3])); if (!isNaN(d3)) return d3; }
+    return null;
+  };
   var handleReceiptFile = function handleReceiptFile(file) {
     if (!file) return;
     setOcrLoading(true);
@@ -808,7 +821,8 @@ function MarketList() {
         }
       }
     }).then(function (result) {
-      var parsed = parseOcrText(result.data.text);
+      var text = result.data.text;
+      var parsed = parseOcrText(text);
       if (parsed.length > 0) {
         setReceiptRows(parsed);
         setOcrMsg("Found " + parsed.length + " item" + (parsed.length !== 1 ? "s" : "") + ". Review below.");
@@ -825,7 +839,55 @@ function MarketList() {
       if (newCustom.length) {
         doSetCustom(function (prev) { return _toConsumableArray(prev).concat(newCustom); });
       }
-      setOcrLoading(false);
+      if (!parsed.length || !token) { setOcrLoading(false); return; }
+      var receiptDate = parseReceiptDate(text);
+      var tDate = receiptDate || new Date();
+      var tYear = tDate.getFullYear();
+      var tMonth = tDate.getMonth();
+      var tWeek = currentWeekOf(tDate);
+      var weekLabel = MONTH_NAMES[tMonth] + " " + tYear + " W" + tWeek;
+      setOcrMsg("Merging into " + weekLabel + "…");
+      var wPath = WEEK_PATH_FN(tYear, tMonth, tWeek);
+      ghReadPath(token, wPath).then(function (wResult) {
+        var existingCart = (wResult.data && wResult.data.cart) ? wResult.data.cart : {};
+        var mergedCart = _objectSpread({}, existingCart);
+        var findCatId = function findCatId(name) {
+          var lower = name.toLowerCase();
+          for (var ci = 0; ci < CATEGORIES.length; ci++) {
+            if (CATEGORIES[ci].items.some(function (it) { return it.toLowerCase() === lower; })) return CATEGORIES[ci].id;
+          }
+          var found = customItems.find(function (ci) { return ci.name.toLowerCase() === lower; });
+          return found ? found.catId : "custom";
+        };
+        parsed.forEach(function (row) {
+          var lower = row.name.toLowerCase();
+          var existingKey = Object.keys(mergedCart).find(function (k) {
+            return mergedCart[k].item && mergedCart[k].item.toLowerCase() === lower;
+          });
+          if (existingKey) {
+            mergedCart[existingKey] = _objectSpread(_objectSpread({}, mergedCart[existingKey]), {}, { price: row.price });
+          } else {
+            var catId = findCatId(row.name);
+            var key = catId + "::" + row.name;
+            mergedCart[key] = { catId: catId, item: row.name, qty: 1, unit: DEFAULT_UNITS[row.name] || "unit", price: row.price };
+          }
+        });
+        return ghWritePath(token, wPath, { v: 2, cart: mergedCart, lastSaved: new Date().toISOString() }, wResult.sha)
+          .then(function (newSha) {
+            setNavYear(tYear);
+            setNavMonth(tMonth);
+            setNavWeek(tWeek);
+            setCart(mergedCart);
+            setGhShaWeekly(newSha);
+            latestSha.current.weekly = newSha;
+            setTab("list");
+            setOcrMsg("Merged " + parsed.length + " item" + (parsed.length !== 1 ? "s" : "") + " into " + weekLabel + ".");
+            setOcrLoading(false);
+          });
+      }).catch(function (err) {
+        setOcrMsg("Merge failed: " + err.message);
+        setOcrLoading(false);
+      });
     }).catch(function (err) {
       setOcrMsg("OCR failed: " + err.message);
       setOcrLoading(false);

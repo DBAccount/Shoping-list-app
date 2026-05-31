@@ -49,7 +49,14 @@
       "qty": 1,
       "unit": "unit",
       "price": ""
+    },
+    "dairy::Whole Milk": {
+      "catId": "dairy",
+      "item": "Whole Milk",
+      "qty": 1,
+      "unit": "litre",
+      "price": ""
     }
   },
-  "lastSaved": "2026-05-31T11:17:50.596Z"
+  "lastSaved": "2026-05-31T11:25:33.735Z"
 }

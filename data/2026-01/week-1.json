@@ -77,7 +77,14 @@
       "qty": 1,
       "unit": "bag",
       "price": ""
+    },
+    "household::Washing Liquid": {
+      "catId": "household",
+      "item": "Washing Liquid",
+      "qty": 1,
+      "unit": "litre",
+      "price": ""
     }
   },
-  "lastSaved": "2026-05-31T11:27:27.173Z"
+  "lastSaved": "2026-05-31T11:27:35.329Z"
 }
